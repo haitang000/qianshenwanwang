@@ -78,6 +78,7 @@ const SCENARIO = {
     },
     { 
       name: '往昔.', 
+      char: true,
       text: '“再往后退一步，你的‘圣域’就要撞翻旧报纸了。”' 
     },
     { 
@@ -98,6 +99,7 @@ const SCENARIO = {
     },
     { 
       name: '往昔.', 
+      char: true,
       text: '“从你说第一句台词起，我就在这了。”' 
     },
     { 
@@ -292,6 +294,7 @@ const SCENARIO = {
     },
     { 
       name: '往昔.', 
+      char: { name: '往昔.', sprite: 'smile' },
       text: '（她低低地笑了。像泉水撞击石头。）' 
     },
     { 

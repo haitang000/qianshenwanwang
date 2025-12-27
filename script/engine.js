@@ -7,12 +7,15 @@ class GameEngine {
         this.isTrolling = false;
         this.hasChoices = false;
         this.loveScore = 0;
+        this.currentName = null;
         this.initParticles();
         this.initKeyboard();
+        // 全局角色字典
+        this.characters = window.CHARACTERS || {};
     }
 
     initParticles() {
-        const container = document.getElementById('particles');
+        const container = this.getEl('particles');
         if (!container) return;
         for (let i = 0; i < 30; i++) {
             const p = document.createElement('div');
@@ -35,12 +38,33 @@ class GameEngine {
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                const viewGame = document.getElementById('view-game');
-                if (!this.isTrolling && !this.hasChoices && viewGame && viewGame.style.display === 'block') {
+                const viewGame = this.getEl('view');
+                const visible = viewGame && getComputedStyle(viewGame).display !== 'none';
+                if (!this.isTrolling && !this.hasChoices && viewGame && visible) {
                     this.next();
                 }
             }
         });
+    }
+
+    // Helper to find an element by multiple possible IDs (keeps engine HTML-agnostic)
+    getEl(key) {
+        const map = {
+            menu: ['menu-home', 'menu-screen'],
+            view: ['view-game', 'game-screen'],
+            bg: ['bg', 'bg-layer'],
+            sprite: ['sprite', 'char-container'],
+            choices: ['choices', 'choice-layer'],
+            particles: ['particles', 'particles-container'],
+            trollScreen: ['troll-screen', 'death-layer'],
+            trollContent: ['troll-content', 'death-layer-content']
+        };
+        const ids = map[key] || [key];
+        for (let id of ids) {
+            const el = document.getElementById(id);
+            if (el) return el;
+        }
+        return null;
     }
 
     saveGame(e) {
@@ -62,8 +86,15 @@ class GameEngine {
             this.idx = data.idx - 1;
             this.loveScore = data.loveScore || 0;
 
-            document.getElementById('menu-home').style.display = 'none';
-            document.getElementById('view-game').style.display = 'block';
+            const menu = this.getEl('menu');
+            const view = this.getEl('view');
+            if (menu) menu.style.display = 'none';
+            if (view) {
+                view.style.display = 'block';
+                requestAnimationFrame(() => view.style.opacity = '1');
+            }
+            const char = this.getEl('sprite');
+            if (char) char.style.opacity = '1';
             this.next();
         } else {
             this.troll('load');
@@ -71,14 +102,42 @@ class GameEngine {
     }
 
     start() {
-        const menu = document.getElementById('menu-home');
-        const view = document.getElementById('view-game');
+        // 在开始前检查是否需要显示前置提示（可选择不再显示）
+        const ack = localStorage.getItem('prelude_ack');
+        if (!ack) return this.showPrelude();
+        this._doStart();
+    }
+
+    _doStart() {
+        const menu = this.getEl('menu');
+        const view = this.getEl('view');
         if (menu) menu.style.opacity = '0';
         setTimeout(() => {
             if (menu) menu.style.display = 'none';
-            if (view) view.style.display = 'block';
+            if (view) {
+                view.style.display = 'block';
+                requestAnimationFrame(() => view.style.opacity = '1');
+            }
+            const char = this.getEl('sprite');
+            if (char) char.style.opacity = '1';
             this.next();
         }, 800);
+    }
+
+    showPrelude() {
+        const pre = document.getElementById('prelude-screen');
+        if (!pre) return this._doStart();
+        pre.style.display = 'flex';
+        requestAnimationFrame(() => pre.style.opacity = '1');
+    }
+
+    confirmPrelude(e) {
+        if (e) e.stopPropagation();
+        const never = document.getElementById('prelude-never');
+        if (never && never.checked) localStorage.setItem('prelude_ack', '1');
+        const pre = document.getElementById('prelude-screen');
+        if (pre) pre.style.display = 'none';
+        this._doStart();
     }
 
     next() {
@@ -90,13 +149,15 @@ class GameEngine {
     }
 
     render(step) {
-        if (step.bg) document.getElementById('bg').style.backgroundImage = `url('${step.bg}')`;
+        const bgEl = this.getEl('bg');
+        if (step.bg && bgEl) bgEl.style.backgroundImage = `url('${step.bg}')`;
         if (step.char) {
-            const s = document.getElementById('sprite');
-            if (s) {
-                s.style.opacity = '1';
-                s.style.transform = 'translateX(-50%) translateY(0)';
-            }
+            // 支持三种格式：
+            // 1) step.char === true -> 使用 step.name 做为角色名并渲染默认立绘
+            // 2) step.char 是字符串 -> 角色名
+            // 3) step.char 是对象 -> { name: '往昔.', sprite: 'smile' }
+            if (step.char === true) this.renderCharacter(step.name);
+            else this.renderCharacter(step.char);
         }
         if (step.choice) this.showChoices(step.choice);
         else if (step.next) {
@@ -109,6 +170,7 @@ class GameEngine {
 
     type(text, name) {
         this.typing = true;
+        this.currentName = name || null;
         const nameEl = document.getElementById('ui-name');
         const textEl = document.getElementById('ui-text');
         if (nameEl) nameEl.innerText = name || "";
@@ -129,9 +191,82 @@ class GameEngine {
         }, 45);
     }
 
+    // 渲染角色立绘，支持多立绘（variant）
+    renderCharacter(spec) {
+        if (!spec) return;
+        let name = null;
+        let variant = null;
+        if (typeof spec === 'string') name = spec;
+        else if (typeof spec === 'object') { name = spec.name; variant = spec.sprite; }
+        if (!name) return;
+
+        const charDef = this.characters[name];
+        const container = this.getEl('sprite');
+        if (!container) return;
+
+        // 找到立绘 URL（优先：指定 variant -> default -> 第一张）
+        let spriteUrl = null;
+        if (charDef && charDef.sprites) {
+            const pick = variant || charDef.default || Object.keys(charDef.sprites)[0];
+            spriteUrl = charDef.sprites[pick];
+        }
+
+        // 如果没有 spriteUrl，保留现有容器（例如 SVG 占位）并只确保它可见
+        if (!spriteUrl) {
+            console.debug('renderCharacter: no sprite for', name, 'keeping placeholder');
+            container.style.opacity = '1';
+            container.style.transform = 'translateX(-50%) translateY(0)';
+            return;
+        }
+        console.debug('renderCharacter:', name, '->', spriteUrl);
+
+        // 使用已有 img 或创建新的 img（仅在有 spriteUrl 时替换）
+        let img = container.querySelector('img.character-sprite');
+        if (!img) {
+            img = document.createElement('img');
+            img.className = 'character-sprite';
+            container.innerHTML = '';
+            container.appendChild(img);
+        }
+
+        // 若已经是相同图片，则直接显示（比较时考虑绝对 URL 与相对路径）
+        const currentSrc = img.src || '';
+        const same = currentSrc === spriteUrl || currentSrc.endsWith(spriteUrl);
+        if (same) {
+            requestAnimationFrame(() => img.style.opacity = '1');
+        } else {
+            img.style.opacity = '0';
+            // 清理旧的 handlers，防止重复触发
+            img.onload = null;
+            img.onerror = null;
+            img.onload = () => requestAnimationFrame(() => img.style.opacity = '1');
+            img.onerror = () => {
+                console.warn('Character sprite failed to load:', spriteUrl);
+                // 回退：用角色默认占位 SVG（如果定义）
+                const charDef2 = this.characters[name];
+                if (charDef2 && charDef2.sprites) {
+                    const fallback = Object.values(charDef2.sprites).find(v => v && v.startsWith('data:image'));
+                    if (fallback) {
+                        img.src = fallback;
+                        return;
+                    }
+                }
+            };
+            img.src = spriteUrl;
+        }
+
+        container.style.opacity = '1';
+        container.style.transform = 'translateX(-50%) translateY(0)';
+    }
+
+    // 动态注册或合并更多角色定义
+    registerCharacters(map) {
+        this.characters = Object.assign({}, this.characters, map);
+    }
+
     showChoices(opts) {
         this.hasChoices = true;
-        const wrap = document.getElementById('choices');
+        const wrap = this.getEl('choices');
         if (!wrap) return;
         wrap.innerHTML = "";
         wrap.style.display = 'flex';
@@ -151,12 +286,26 @@ class GameEngine {
         });
     }
 
+    // 支持点击推进（对应 HTML 的 onclick="game.clickScreen(event)")
+    clickScreen(e) {
+        if (e) e.stopPropagation();
+        if (this.isTrolling || this.hasChoices) return;
+        if (this.typing) { this.typing = false; return; }
+        this.next();
+    }
+
+    // 显示跳过/系统设置的死亡彩蛋
+    death(e) {
+        if (e) e.stopPropagation();
+        this.troll('skip');
+    }
+
     async troll(type, event) {
         if (event) event.stopPropagation();
         if (this.isTrolling) return;
         this.isTrolling = true;
-        const screen = document.getElementById('troll-screen');
-        const container = document.getElementById('troll-content');
+        const screen = this.getEl('trollScreen');
+        const container = this.getEl('trollContent');
         if (!screen || !container) return;
 
         let title = "CONNECTION LOST";
@@ -164,8 +313,8 @@ class GameEngine {
         let btn = "返回观测";
 
         if (type === 'skip') {
-            title = "TOO FAST TO LIVE";
-            lines = ["你的人生也打算快进吗？", "与其跳过，不如从未开始。"];
+            title = "跳过剧情等于跳过人生";
+            lines = ["---- 我也不知道谁说的", "与其跳过，不如从未开始。"];
             btn = "对不起，我想慢下来";
         } else if (type === 'load') {
             title = "ARCHIVE ERROR";

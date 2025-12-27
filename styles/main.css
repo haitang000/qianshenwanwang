@@ -147,6 +147,58 @@ html {
   transition: opacity 1s;
 }
 
+/* 启动前提示样式 */
+#prelude-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.6);
+}
+.prelude-box {
+  width: min(720px, 92%);
+  background: rgba(18,18,20,0.95);
+  border-radius: 8px;
+  padding: 28px 30px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  text-align: center;
+  border-left: 4px solid var(--theme-gold);
+}
+.prelude-title {
+  font-family: var(--font-art);
+  color: var(--theme-gold);
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+.prelude-text {
+  color: #efefef;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+.prelude-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #cfcfcf;
+  font-size: 0.9rem;
+  margin-bottom: 18px;
+}
+.prelude-actions { display:flex; gap:12px; justify-content:center; }
+.btn-confirm, .btn-cancel {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  color: #fff;
+  cursor: pointer;
+}
+.btn-confirm { border-color: var(--theme-gold); color: var(--theme-gold); }
+.btn-confirm:hover { background: rgba(226,192,141,0.06); }
+.btn-cancel { color: #aaa; }
+.btn-cancel:hover { background: rgba(255,255,255,0.02); }
+
 /* 立绘：浮动呼吸 */
 #char-container {
   position: absolute;
@@ -168,6 +220,18 @@ html {
   50% {
     transform: translateX(-50%) scale(1.02);
   }
+}
+
+/* 立绘：图片渲染兼容（当使用外部图片作为角色立绘时） */
+#char-container img.character-sprite {
+  max-height: 90vh;
+  height: 90vh;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  opacity: 0;
+  will-change: opacity, transform;
 }
 
 /* 对话框：底部悬浮极简条 */

@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>千神万王：因果螺旋</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="script/characters.js"></script>
     <script src="script/scenario.js"></script>
-    <script src="script/engine.js"></script>
+    <script src="script/engine.js"></script> 
     <link rel="stylesheet" href="styles/main.css"/>
     <link
       href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@300;600;900&display=swap"
@@ -31,6 +32,19 @@
             <div class="nav-link" onclick="game.start()">开始观测 · START</div>
             <div class="nav-link" onclick="game.load()">溯源记录 · LOAD</div>
             <div class="nav-link" onclick="game.death()">系统设置 · CONFIG</div>
+        </div>
+    </div>
+
+    <!-- 启动前提示 -->
+    <div id="prelude-screen" style="display:none;">
+        <div class="prelude-box">
+            <div class="prelude-title">提示</div>
+            <div class="prelude-text">本故事纯属虚构。如有雷同，纯属巧合。<br/>本作品可能包含闪烁或高对比度效果，可能对光敏性癫痫者造成风险。如有不适，请立即停止观看并就医。</div>
+            <label class="prelude-checkbox"><input type="checkbox" id="prelude-never"> 不再显示</label>
+            <div class="prelude-actions">
+                <button class="btn-confirm" onclick="game.confirmPrelude(event)">我已知晓，开始观测</button>
+                <button class="btn-cancel" onclick="document.getElementById('prelude-screen').style.display='none'">返回</button>
+            </div>
         </div>
     </div>
 
