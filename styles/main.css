@@ -156,7 +156,11 @@ html {
   justify-content: center;
   align-items: center;
   background: rgba(0,0,0,0.6);
+  opacity: 0;
+  transition: opacity 260ms ease;
 }
+
+/* 在显示时请使用 `display: flex` 后设置 opacity: 1 来做淡入 */
 .prelude-box {
   width: min(720px, 92%);
   background: rgba(18,18,20,0.95);
@@ -314,6 +318,27 @@ html {
   align-items: center;
   gap: 25px;
 }
+
+/* Engine 会生成 .opt-card 元素作为选项 */
+#choice-layer .opt-card {
+  min-width: 380px;
+  max-width: 92%;
+  padding: 18px 26px;
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  font-size: 1.05rem;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 220ms cubic-bezier(0.22,1,0.36,1), background 220ms;
+}
+#choice-layer .opt-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.06);
+}
+#choice-layer .opt-card:active { transform: translateY(-2px); }
+
 .choice-btn {
   min-width: 400px;
   padding: 20px 40px;
@@ -387,6 +412,46 @@ html {
   to {
     opacity: 1;
   }
+}
+
+/* troll 弹窗内部内容样式（供 engine.troll 使用） */
+#death-layer .troll-content {
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+  align-items: center;
+  color: #fff;
+  padding: 12px 18px;
+  max-width: 720px;
+}
+.glitch-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--theme-gold);
+  letter-spacing: 1px;
+}
+.troll-line {
+  color: #ddd;
+  opacity: 0.95;
+}
+.retry-btn {
+  margin-top: 8px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--theme-gold);
+  background: rgba(226,192,141,0.06);
+  color: var(--theme-gold);
+  cursor: pointer;
+}
+
+/* 简单的上浮淡入效果，engine 使用 .animate-up 类名 */
+.animate-up {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: up-appear 420ms ease forwards;
+}
+@keyframes up-appear {
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* 噪音纹理 */
