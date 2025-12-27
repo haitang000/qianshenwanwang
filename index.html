@@ -14,77 +14,66 @@
     />
   </head>
   <body>
-    <div id="app">
-      <!-- 动态背景 -->
-      <div
-        id="bg"
-        style="
-          background-image: url('https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1920&q=80');
-        "
-      ></div>
-      <div id="particles"></div>
-      <div class="vignette"></div>
+<div id="stage">
+    <div class="noise"></div> <!-- 胶片颗粒感 -->
+    
+    <!-- 动态背景 -->
+    <div id="bg-layer" class="pan-anim"></div>
+    <div class="cinematic-overlay"></div>
 
-      <!-- 主菜单 -->
-      <div id="menu-home" class="flex items-center justify-center h-screen">
-        <div class="nav-sidebar">
-          <div class="logo-v">千神万王</div>
-          <div class="nav-item cursor-pointer p-4 bg-white/10 hover:bg-white/20 transition-all text-2xl" onclick="game.start()">观测开始</div>
-          <div class="nav-item" onclick="game.troll('load')">溯源记录</div>
-          <div class="nav-item" onclick="game.troll('config')">系统参数</div>
-          <div class="nav-item" onclick="window.close()">终结观测</div>
+    <!-- 主菜单 -->
+    <div id="menu-screen">
+        <div class="title-block">
+            <div class="main-logo">千神万王</div>
+            <div class="sub-logo">The Spiral of Causality</div>
         </div>
-      </div>
+        <div class="menu-nav">
+            <div class="nav-link" onclick="game.start()">开始观测 · START</div>
+            <div class="nav-link" onclick="game.load()">溯源记录 · LOAD</div>
+            <div class="nav-link" onclick="game.death()">系统设置 · CONFIG</div>
+        </div>
+    </div>
 
-      <!-- 游戏界面 -->
-      <div id="view-game">
+    <!-- 游戏层 -->
+    <div id="game-screen" onclick="game.clickScreen(event)">
         <!-- 立绘 -->
-        <div id="sprite" class="char-sprite">
-          <svg viewBox="0 0 400 800" height="100%">
-            <path
-              d="M100 300 L50 800 L350 800 L300 300 Z"
-              fill="#fff"
-              opacity="0.9"
-            />
-            <path d="M80 200 Q200 60 320 200 Q340 450 320 750" fill="#2d3436" />
-            <circle cx="200" cy="180" r="80" fill="#fff9f0" />
-            <circle cx="170" cy="190" r="6" fill="#74c0fc" />
-            <circle cx="230" cy="190" r="6" fill="#74c0fc" />
-            <path
-              d="M185 235 Q200 245 215 235"
-              stroke="#ff7675"
-              fill="none"
-              stroke-width="2"
-            />
-          </svg>
+        <div id="char-container">
+            <svg viewBox="0 0 400 800" height="100%" style="overflow:visible">
+                <defs>
+                    <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                <path d="M100 300 L50 850 L350 850 L300 300 Z" fill="#e0e0e0" opacity="0.9" />
+                <path d="M80 200 Q200 60 320 200 Q340 450 320 750" fill="#1a1a1a" />
+                <circle cx="200" cy="180" r="80" fill="#fff5e6" />
+                <path d="M120 150 Q200 60 280 150" fill="#1a1a1a" />
+                <circle cx="170" cy="190" r="5" fill="#5dade2" filter="url(#glow)" />
+                <circle cx="230" cy="190" r="5" fill="#5dade2" filter="url(#glow)" />
+            </svg>
         </div>
 
         <!-- 对话框 -->
-        <div class="dialog-wrap">
-          <div id="ui-name" class="name-tag"></div>
-          <div class="msg-box" onclick="game.next()">
-            <div id="ui-text" class="msg-text"></div>
-            <div class="controls">
-              <span class="btn-ctrl">LOG</span>
-              <span class="btn-ctrl">SAVE</span>
-              <span id="btn-skip" class="btn-ctrl" onclick="game.troll('skip')"
-                >SKIP</span
-              >
-              <span class="btn-ctrl">AUTO</span>
-              <span class="btn-ctrl">HIDE</span>
+        <div class="dialog-bar" id="dialog-box">
+            <div id="ui-name" class="speaker-name"></div>
+            <div id="ui-text" class="dialog-text"></div>
+            
+            <div class="mini-controls">
+                <div class="ctrl-btn" onclick="game.save(event)">SAVE</div>
+                <div class="ctrl-btn" onclick="game.load()">LOAD</div>
+                <div class="ctrl-btn" onclick="game.death()">SKIP</div>
+                <div class="ctrl-btn" onclick="location.reload()">TITLE</div>
             </div>
-          </div>
         </div>
-      </div>
-
-      <!-- 选项面板 -->
-      <div id="choices"></div>
-
-      <!-- 整蛊黑屏 -->
-      <div id="troll-screen">
-        <div id="troll-content" class="flex flex-col items-center"></div>
-      </div>
     </div>
+
+    <!-- 选项层 -->
+    <div id="choice-layer"></div>
+
+    <!-- 死亡彩蛋 -->
+    <div id="death-layer" onclick="location.reload()">
+        <div class="game-over-title">因果崩坏</div>
+        <div class="death-tips">不可跳过的命运终局</div>
+    </div>
+</div>
 
     <script>
       console.log("亻尔女子，我是千神万王开发者haitang000。");
