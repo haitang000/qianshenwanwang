@@ -1,4 +1,4 @@
-const Scenario = {
+const SCENARIO = {
   // 序章：两座被世界遗忘的孤岛
   intro: [
     { 
