@@ -12,6 +12,7 @@
             font-family: var(--font-main);
             color: #f0f0f0;
             -webkit-font-smoothing: antialiased;
+            user-select: none;
         }
 
         #stage { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
@@ -150,7 +151,6 @@
             cursor: pointer;
         }
         .game-over-title {
-            font-family: 'Ma Shan Zheng', cursive;
             font-size: 7rem; color: #c00;
             letter-spacing: 1rem;
             animation: death-reveal 4s cubic-bezier(0.19, 1, 0.22, 1) forwards;
