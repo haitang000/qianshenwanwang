@@ -1,4 +1,4 @@
-const SCENARIO = {
+const STORY = {
   // 序章：两座被世界遗忘的孤岛
   intro: [
     { 
@@ -78,7 +78,7 @@ const SCENARIO = {
     },
     { 
       name: '往昔.', 
-      char: true,
+      char: { name: '往昔.', sprite: 'neutral' },
       text: '“再往后退一步，你的‘圣域’就要撞翻旧报纸了。”' 
     },
     { 
@@ -99,7 +99,7 @@ const SCENARIO = {
     },
     { 
       name: '往昔.', 
-      char: true,
+      char: { name: '往昔.', sprite: 'smile' },
       text: '“从你说第一句台词起，我就在这了。”' 
     },
     { 
@@ -219,8 +219,8 @@ const SCENARIO = {
       text: '（她的话带着笑意。斜阳下，她的面容有了柔和的光晕。）' 
     },
     { 
-      char: true, 
       name: '往昔.', 
+      char: { name: '往昔.', sprite: 'neutral' }, 
       text: '“神王大人……如果你真的能让星辰闪耀。”' 
     },
     { 

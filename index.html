@@ -1,24 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>千神万王：因果螺旋</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="script/characters.js"></script>
     <script src="script/scenario.js"></script>
-    <script src="script/engine.js"></script> 
-    <link rel="stylesheet" href="styles/main.css"/>
-    <link
-      href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@300;600;900&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
+    <script src="script/engine.js"></script>
+    <link rel="stylesheet" href="styles/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+</head>
+<body>
+
 <div id="stage">
-    <div class="noise"></div> <!-- 胶片颗粒感 -->
-    
-    <!-- 动态背景 -->
+    <div class="noise"></div>
     <div id="bg-layer" class="pan-anim"></div>
     <div class="cinematic-overlay"></div>
 
@@ -35,35 +31,10 @@
         </div>
     </div>
 
-    <!-- 启动前提示 -->
-    <div id="prelude-screen" style="display:none;">
-        <div class="prelude-box">
-            <div class="prelude-title">提示</div>
-            <div class="prelude-text">本故事纯属虚构。如有雷同，纯属巧合。<br/>本作品可能包含闪烁或高对比度效果，可能对光敏性癫痫者造成风险。如有不适，请立即停止观看并就医。</div>
-            <label class="prelude-checkbox"><input type="checkbox" id="prelude-never"> 不再显示</label>
-            <div class="prelude-actions">
-                <button class="btn-confirm" onclick="game.confirmPrelude(event)">我已知晓，开始观测</button>
-                <button class="btn-cancel" onclick="document.getElementById('prelude-screen').style.display='none'">返回</button>
-            </div>
-        </div>
-    </div>
-
     <!-- 游戏层 -->
     <div id="game-screen" onclick="game.clickScreen(event)">
-        <!-- 立绘 -->
-        <div id="char-container">
-            <svg viewBox="0 0 400 800" height="100%" style="overflow:visible">
-                <defs>
-                    <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                </defs>
-                <path d="M100 300 L50 850 L350 850 L300 300 Z" fill="#e0e0e0" opacity="0.9" />
-                <path d="M80 200 Q200 60 320 200 Q340 450 320 750" fill="#1a1a1a" />
-                <circle cx="200" cy="180" r="80" fill="#fff5e6" />
-                <path d="M120 150 Q200 60 280 150" fill="#1a1a1a" />
-                <circle cx="170" cy="190" r="5" fill="#5dade2" filter="url(#glow)" />
-                <circle cx="230" cy="190" r="5" fill="#5dade2" filter="url(#glow)" />
-            </svg>
-        </div>
+        <!-- 立绘容器 -->
+        <div id="char-container"></div>
 
         <!-- 对话框 -->
         <div class="dialog-bar" id="dialog-box">
@@ -79,19 +50,12 @@
         </div>
     </div>
 
-    <!-- 选项层 -->
     <div id="choice-layer"></div>
 
-    <!-- 死亡彩蛋 -->
     <div id="death-layer" onclick="location.reload()">
         <div class="game-over-title">因果崩坏</div>
-        <div class="death-tips">不可跳过的命运终局</div>
     </div>
 </div>
 
-    <script>
-      console.log("亻尔女子，我是千神万王开发者haitang000。");
-      const game = new GameEngine(SCENARIO);
-    </script>
-  </body>
+</body>
 </html>
