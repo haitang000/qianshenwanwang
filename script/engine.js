@@ -66,8 +66,39 @@ class Renderer {
             nameEl: document.getElementById('ui-name'),
             dialogBox: document.getElementById('dialog-box'),
             textEl: document.getElementById('ui-text'),
-            choiceLayer: document.getElementById('choice-layer')
+            choiceLayer: document.getElementById('choice-layer'),
+            loadingLayer: document.getElementById('loading-layer'),
+            loadingProgress: document.querySelector('.loading-progress'),
+            loadingPercentage: document.querySelector('.loading-percentage'),
+            loadingText: document.querySelector('.loading-text')
         };
+    }
+
+    // 渲染加载进度条
+    renderLoadingProgress(progress, text = '加载中...') {
+        if (this.elements.loadingProgress && this.elements.loadingPercentage) {
+            const percent = Math.min(100, Math.max(0, progress));
+            this.elements.loadingProgress.style.width = `${percent}%`;
+            this.elements.loadingPercentage.textContent = `${percent}%`;
+        }
+        if (this.elements.loadingText) {
+            this.elements.loadingText.textContent = text;
+        }
+    }
+
+    // 显示加载进度条
+    showLoading() {
+        if (this.elements.loadingLayer) {
+            this.elements.loadingLayer.style.display = 'flex';
+            this.renderLoadingProgress(0);
+        }
+    }
+
+    // 隐藏加载进度条
+    hideLoading() {
+        if (this.elements.loadingLayer) {
+            this.elements.loadingLayer.style.display = 'none';
+        }
     }
 
     // 渲染背景
@@ -245,6 +276,30 @@ class ResourceManager {
         this.cache = new Map();
         this.loadingQueue = new Map();
         this.maxRetries = 3;
+        this.loadingProgress = 0;
+        this.totalResources = 0;
+        this.loadedResources = 0;
+        this.progressCallbacks = [];
+    }
+
+    // 注册进度回调
+    onProgress(callback) {
+        this.progressCallbacks.push(callback);
+        return () => {
+            this.progressCallbacks = this.progressCallbacks.filter(cb => cb !== callback);
+        };
+    }
+
+    // 更新进度
+    updateProgress() {
+        this.loadingProgress = Math.round((this.loadedResources / this.totalResources) * 100);
+        this.progressCallbacks.forEach(callback => {
+            try {
+                callback(this.loadingProgress);
+            } catch (error) {
+                console.error('Error in progress callback:', error);
+            }
+        });
     }
 
     // 预加载图片资源
@@ -257,6 +312,9 @@ class ResourceManager {
             return this.loadingQueue.get(url);
         }
 
+        this.totalResources++;
+        this.updateProgress();
+
         const promise = new Promise((resolve, reject) => {
             let retries = 0;
             const loadImage = () => {
@@ -264,6 +322,8 @@ class ResourceManager {
                 img.onload = () => {
                     this.cache.set(url, img);
                     this.loadingQueue.delete(url);
+                    this.loadedResources++;
+                    this.updateProgress();
                     resolve(img);
                 };
                 img.onerror = () => {
@@ -272,6 +332,8 @@ class ResourceManager {
                         setTimeout(loadImage, 500 * retries);
                     } else {
                         this.loadingQueue.delete(url);
+                        this.loadedResources++;
+                        this.updateProgress();
                         reject(new Error(`Failed to load image after ${this.maxRetries} attempts: ${url}`));
                     }
                 };
@@ -488,6 +550,12 @@ class Engine {
         console.log('Engine 2.0 starting...');
 
         try {
+            // 显示加载进度条
+            this.renderer.showLoading();
+
+            // 预加载初始资源
+            await this.preloadInitialResources();
+
             // 隐藏菜单
             const menu = document.getElementById('menu-screen');
             if (!menu) {
@@ -505,17 +573,59 @@ class Engine {
             }
             difficultyLayer.style.display = 'flex';
 
+            // 隐藏加载进度条
+            this.renderer.hideLoading();
+
             const startupTime = this.performanceMonitor.endTimer('startup');
             this.performanceMonitor.addMetric('startupTime', startupTime);
             this.eventSystem.emit('engine:started', startupTime);
 
         } catch (error) {
             console.error('Failed to start engine:', error);
+            this.renderer.hideLoading();
             this.eventSystem.emit('engine:error', error);
         }
     }
 
-    selectDifficulty(difficulty) {
+    // 预加载初始资源
+    async preloadInitialResources() {
+        const resourcesToLoad = [];
+        
+        // 收集需要预加载的资源
+        if (STORY.intro && STORY.intro[0] && STORY.intro[0].bg) {
+            resourcesToLoad.push(STORY.intro[0].bg);
+        }
+        
+        // 添加角色图片资源
+        for (const [name, char] of Object.entries(this.characters)) {
+            if (char.img) {
+                resourcesToLoad.push(char.img);
+            }
+        }
+        
+        // 如果没有资源需要加载，直接返回
+        if (resourcesToLoad.length === 0) {
+            return;
+        }
+        
+        // 注册进度回调
+        const removeCallback = this.resourceManager.onProgress((progress) => {
+            this.renderer.renderLoadingProgress(progress, '初始化资源...');
+        });
+        
+        try {
+            // 并行加载所有资源
+            const promises = resourcesToLoad.map(url => this.resourceManager.preloadImage(url));
+            await Promise.all(promises);
+        } catch (error) {
+            console.error('Error preloading resources:', error);
+        } finally {
+            // 移除进度回调
+            removeCallback();
+        }
+    }
+
+    async selectDifficulty(difficulty) {
         const difficultyLayer = document.getElementById('difficulty-layer');
         const deathLayer = document.getElementById('death-layer');
         const subtitle = document.querySelector('.game-over-subtitle');
@@ -538,23 +648,34 @@ class Engine {
                 deathLayer.style.display = 'flex';
                 break;
             case 'hard':
+                // 显示加载进度条
+                this.renderer.showLoading();
+                
+                // 预加载intro场景的资源
+                if (STORY.intro) {
+                    await this.preloadSceneResources(STORY.intro, '加载游戏场景...');
+                }
+                
                 if (gameScreen) {
                     gameScreen.style.display = 'block';
                     setTimeout(() => {
                         gameScreen.style.opacity = '1';
                         this.sceneManager.currentSceneId = 'intro';
+                        this.renderer.hideLoading();
                         this.next();
                     }, 100);
                 } else {
+                    this.renderer.hideLoading();
                     throw new Error('Game screen not found');
                 }
                 break;
             default:
+                this.renderer.hideLoading();
                 throw new Error(`Invalid difficulty: ${difficulty}`);
         }
     }
 
-    next() {
+    async next() {
         if (this.isLocked) return;
 
         this.performanceMonitor.startTimer('stepTime');
@@ -573,11 +694,12 @@ class Engine {
                 return;
             }
 
-            this.renderStep(step);
+            await this.renderStep(step);
             this.eventSystem.emit('step:rendered', step);
 
         } catch (error) {
             console.error('Error in next():', error);
+            this.renderer.hideLoading(); // 确保加载进度条隐藏
             this.eventSystem.emit('engine:error', error);
         } finally {
             const stepTime = this.performanceMonitor.endTimer('stepTime');
@@ -585,7 +707,7 @@ class Engine {
         }
     }
 
-    renderStep(step) {
+    async renderStep(step) {
         this.performanceMonitor.startTimer('renderTime');
 
         try {
@@ -600,7 +722,7 @@ class Engine {
             }
             // 处理场景跳转
             else if (step.next) {
-                this.handleSceneTransition(step.next);
+                await this.handleSceneTransition(step.next);
             }
             // 处理对话
             else if (step.text) {
@@ -611,6 +733,7 @@ class Engine {
 
         } catch (error) {
             console.error('Error in renderStep():', error);
+            this.renderer.hideLoading(); // 确保加载进度条隐藏
             this.eventSystem.emit('engine:error', error);
         } finally {
             const renderTime = this.performanceMonitor.endTimer('renderTime');
@@ -636,8 +759,23 @@ class Engine {
         });
     }
 
-    handleSceneTransition(nextSceneId) {
+    async handleSceneTransition(nextSceneId) {
+        // 显示加载进度条
+        this.renderer.showLoading();
+        
+        // 预加载目标场景的资源
+        const targetScene = this.data[nextSceneId];
+        if (targetScene) {
+            await this.preloadSceneResources(targetScene, '加载新场景...');
+        }
+        
+        // 切换场景
         this.sceneManager.currentSceneId = nextSceneId;
+        
+        // 隐藏加载进度条
+        this.renderer.hideLoading();
+        
+        // 继续游戏
         this.next();
         this.eventSystem.emit('scene:transition', nextSceneId);
     }
@@ -686,7 +824,7 @@ class Engine {
     }
 
     // 加载游戏
-    load() {
+    async load() {
         const raw = localStorage.getItem('grace_save');
         if (!raw) {
             // 处理加载失败
@@ -700,12 +838,68 @@ class Engine {
 
         try {
             const saveData = JSON.parse(raw);
+            
+            // 显示加载进度条
+            this.renderer.showLoading();
+            
+            // 预加载保存点所在场景的资源
+            const sceneId = saveData.state;
+            const scene = this.data[sceneId];
+            if (scene) {
+                await this.preloadSceneResources(scene, '加载游戏数据...');
+            }
+            
             this.sceneManager.setCurrentState(saveData.state, saveData.index);
             this.start();
             this.eventSystem.emit('game:loaded', saveData);
+            
+            // 隐藏加载进度条
+            this.renderer.hideLoading();
         } catch (error) {
             console.error('Error loading game:', error);
+            this.renderer.hideLoading();
             this.death();
+        }
+    }
+
+    // 预加载场景资源
+    async preloadSceneResources(scene, text = '加载场景资源...') {
+        const resourcesToLoad = new Set();
+        
+        // 收集场景中的所有资源
+        scene.forEach(step => {
+            if (step.bg) {
+                resourcesToLoad.add(step.bg);
+            }
+            // 处理角色图片资源
+            if (step.char) {
+                const charName = step.char.name || step.name;
+                const sprite = step.char.sprite || 'neutral';
+                const basePath = charName === '往昔.' ? 'assets/characters/wangxi/' : '';
+                const imgSrc = `${basePath}${sprite}.png`;
+                resourcesToLoad.add(imgSrc);
+            }
+        });
+        
+        // 如果没有资源需要加载，直接返回
+        if (resourcesToLoad.size === 0) {
+            return;
+        }
+        
+        // 注册进度回调
+        const removeCallback = this.resourceManager.onProgress((progress) => {
+            this.renderer.renderLoadingProgress(progress, text);
+        });
+        
+        try {
+            // 并行加载所有资源
+            const promises = Array.from(resourcesToLoad).map(url => this.resourceManager.preloadImage(url));
+            await Promise.all(promises);
+        } catch (error) {
+            console.error('Error preloading scene resources:', error);
+        } finally {
+            // 移除进度回调
+            removeCallback();
         }
     }
 
