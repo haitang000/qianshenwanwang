@@ -52,6 +52,17 @@
 
     <div id="choice-layer"></div>
 
+    <!-- 难度选择页面 -->
+    <div id="difficulty-layer">
+        <div class="difficulty-title">选择观测难度</div>
+        <div class="difficulty-options">
+            <div class="difficulty-option" onclick="game.selectDifficulty('easy')">简单</div>
+            <div class="difficulty-option" onclick="game.selectDifficulty('medium')">中等</div>
+            <div class="difficulty-option" onclick="game.selectDifficulty('hard')">困难</div>
+            <div class="difficulty-option" onclick="game.selectDifficulty('porcelain')">瓷器</div>
+        </div>
+    </div>
+
     <div id="death-layer" onclick="location.reload()">
         <div class="game-over-title">死</div>
         <div class="game-over-subtitle">跳过剧情等于跳过生命<br>---我也不知道谁说的别问我</div>

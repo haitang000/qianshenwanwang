@@ -24,15 +24,57 @@ class Engine {
         menu.style.opacity = '0';
         menu.style.pointerEvents = 'none';
         setTimeout(() => {
-            const gameScreen = document.getElementById('game-screen');
-            if (gameScreen) {
-                gameScreen.style.display = 'block';
-                setTimeout(() => gameScreen.style.opacity = '1', 100);
+            // 显示难度选择页面
+            const difficultyLayer = document.getElementById('difficulty-layer');
+            if (difficultyLayer) {
+                difficultyLayer.style.display = 'flex';
             } else {
-                console.error("Game screen not found!");
+                console.error("Difficulty layer not found!");
             }
-            this.next();
         }, 800);
+    }
+
+    selectDifficulty(difficulty) {
+        const difficultyLayer = document.getElementById('difficulty-layer');
+        const deathLayer = document.getElementById('death-layer');
+        const subtitle = document.querySelector('.game-over-subtitle');
+        const gameScreen = document.getElementById('game-screen');
+        
+        if (!difficultyLayer || !deathLayer || !subtitle) {
+            console.error("Required elements not found!");
+            return;
+        }
+        
+        switch(difficulty) {
+            case 'easy':
+            case 'medium':
+                // 显示死亡页面，小字显示“不整点高难度的？”
+                difficultyLayer.style.display = 'none';
+                subtitle.innerHTML = '不整点高难度的？';
+                deathLayer.style.display = 'flex';
+                break;
+            case 'porcelain':
+                // 显示死亡页面，小字显示“学校里不能谈恋爱😡”
+                difficultyLayer.style.display = 'none';
+                subtitle.innerHTML = '学校里不能谈恋爱😡';
+                deathLayer.style.display = 'flex';
+                break;
+            case 'hard':
+                // 进入游戏
+                difficultyLayer.style.display = 'none';
+                if (gameScreen) {
+                    gameScreen.style.display = 'block';
+                    setTimeout(() => {
+                        gameScreen.style.opacity = '1';
+                        this.next();
+                    }, 100);
+                } else {
+                    console.error("Game screen not found!");
+                }
+                break;
+            default:
+                console.error("Invalid difficulty!");
+        }
     }
 
     clickScreen(e) {
