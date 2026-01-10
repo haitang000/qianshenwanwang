@@ -163,7 +163,14 @@ class Engine {
 
     load() {
         const raw = localStorage.getItem('grace_save');
-        if (!raw) return this.death();
+        if (!raw) {
+            // 修改死亡层的小字内容
+            const subtitle = document.querySelector('.game-over-subtitle');
+            if (subtitle) {
+                subtitle.innerHTML = '我说了Coming Soon你尔多隆吗';
+            }
+            return this.death();
+        }
         const s = JSON.parse(raw);
         this.state = s.state;
         this.index = s.index - 1;

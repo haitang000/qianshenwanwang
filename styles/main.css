@@ -155,7 +155,17 @@
             letter-spacing: 1rem;
             animation: death-reveal 4s cubic-bezier(0.19, 1, 0.22, 1) forwards;
         }
+        .game-over-subtitle {
+            font-size: 1.5rem; color: #666;
+            text-align: center;
+            margin-top: 2rem;
+            letter-spacing: 0.2rem;
+            line-height: 2;
+            animation: death-reveal-sub 4.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            opacity: 0;
+        }
         @keyframes death-reveal { from { opacity: 0; transform: scale(1.2); } to { opacity: 1; transform: scale(1); } }
+        @keyframes death-reveal-sub { from { opacity: 0; transform: translateY(20px); } to { opacity: 0.8; transform: translateY(0); } }
         
         .noise {
             position: absolute; inset: 0; opacity: 0.03; pointer-events: none; z-index: 999;
