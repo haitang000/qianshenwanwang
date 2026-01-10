@@ -4,8 +4,8 @@ const CHARACTERS = {
         theme: '#e2c08d',
         img: null
     },
-    '往昔': {
-        name: '往昔',
+    '往昔.': {
+        name: '往昔.',
         theme: '#d98880',
         img: 'assets/characters/wangxi/neutral.png'
     },

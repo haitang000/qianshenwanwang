@@ -62,7 +62,7 @@ class Engine {
     render(step) {
         if (step.bg) document.getElementById('bg-layer').style.backgroundImage = `url('${step.bg}')`;
         
-        const charData = this.chars[step.speaker];
+        const charData = this.chars[step.name];
         const container = document.getElementById('char-container');
         const nameEl = document.getElementById('ui-name');
         const box = document.getElementById('dialog-box');
@@ -72,12 +72,26 @@ class Engine {
             box.style.borderLeftColor = charData.theme;
             
             // 图片立绘渲染逻辑
-            if (charData.img) {
+            let imgSrc = charData.img;
+            
+            // 处理char字段，支持动态切换立绘
+            if (step.char) {
+                const charName = step.char.name || step.name;
+                const sprite = step.char.sprite || 'neutral';
+                // 根据角色名和表情构建图片路径
+                const basePath = charName === '往昔.' ? 'assets/characters/wangxi/' : '';
+                imgSrc = `${basePath}${sprite}.png`;
+            }
+            
+            if (imgSrc) {
                 const currentImg = container.querySelector('img');
-                if (!currentImg || currentImg.src !== charData.img) {
+                // 检查图片是否需要更新
+                const shouldUpdate = !currentImg || !currentImg.src.endsWith(imgSrc);
+                
+                if (shouldUpdate) {
                     container.style.opacity = '0';
                     setTimeout(() => {
-                        container.innerHTML = `<img src="${charData.img}" class="char-img" onerror="this.style.display='none'">`;
+                        container.innerHTML = `<img src="${imgSrc}" class="char-img" onerror="this.style.display='none'">`;
                         container.style.opacity = '1';
                         container.style.transform = 'translateX(-50%) translateY(0)';
                     }, 200);
@@ -95,7 +109,7 @@ class Engine {
             this.index = -1;
             this.next();
         } else {
-            this.type(step.text, step.speaker);
+            this.type(step.text, step.name);
         }
     }
 
