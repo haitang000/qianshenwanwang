@@ -508,6 +508,7 @@ class Engine {
         // 内部状态
         this.typing = false;
         this.typingTimer = null;
+        this.saveLoadTimer = null;
         this.isLocked = false;
         this.characters = CHARACTERS;
 
@@ -681,6 +682,19 @@ class Engine {
         this.performanceMonitor.startTimer('stepTime');
 
         try {
+            // 清除保存/加载消息的定时器
+            if (this.saveLoadTimer) {
+                clearTimeout(this.saveLoadTimer);
+                this.saveLoadTimer = null;
+                
+                // 恢复文本颜色和样式
+                const textEl = document.getElementById('ui-text');
+                if (textEl) {
+                    textEl.style.color = '';
+                    textEl.style.fontWeight = '';
+                }
+            }
+            
             // 如果正在打字，直接完成打字
             if (this.typing) {
                 this.finishType();
@@ -755,11 +769,17 @@ class Engine {
                 this.next();
             }
             
+            // 选择完成后自动保存
+            this.autoSave();
+            
             this.eventSystem.emit('choice:selected', choice);
         });
     }
 
     async handleSceneTransition(nextSceneId) {
+        // 自动保存当前状态
+        this.autoSave();
+        
         // 显示加载进度条
         this.renderer.showLoading();
         
@@ -780,19 +800,26 @@ class Engine {
         this.eventSystem.emit('scene:transition', nextSceneId);
     }
 
-    handleDialogue(step) {
+    handleDialogue(step, skipTyping = false) {
         const charData = this.characters[step.name];
         
         // 渲染角色
         this.renderer.renderCharacter(step, charData);
         
-        // 渲染对话（打字效果）
-        this.typing = true;
-        this.typingTimer = this.renderer.renderTypingEffect(
-            step.text,
-            step.name,
-            () => this.finishType()
-        );
+        // 渲染对话
+        if (skipTyping) {
+            // 直接显示完整文本（用于加载游戏时）
+            this.renderer.renderDialogue(step.text, step.name);
+            this.typing = false;
+        } else {
+            // 打字效果
+            this.typing = true;
+            this.typingTimer = this.renderer.renderTypingEffect(
+                step.text,
+                step.name,
+                () => this.finishType()
+            );
+        }
     }
 
     finishType() {
@@ -800,65 +827,213 @@ class Engine {
             clearInterval(this.typingTimer);
             this.typingTimer = null;
         }
+        
+        // 确保当前台词的完整文本显示出来
+        const currentStep = this.sceneManager.currentScene && 
+                           this.sceneManager.currentIndex >= 0 &&
+                           this.sceneManager.currentIndex < this.sceneManager.currentScene.length
+                           ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
+                           : null;
+        
+        if (currentStep && currentStep.text) {
+            this.renderer.renderDialogue(currentStep.text, currentStep.name);
+        }
+        
         this.typing = false;
+        
+        // 对话完成后自动保存
+        this.autoSave();
+        
         this.eventSystem.emit('typing:finished');
     }
 
-    // 保存游戏
-    save() {
+    // 自动保存游戏（无UI提示）
+    autoSave() {
+        // 获取当前步骤信息
+        const currentStep = this.sceneManager.currentScene && 
+                           this.sceneManager.currentIndex >= 0 &&
+                           this.sceneManager.currentIndex < this.sceneManager.currentScene.length
+                           ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
+                           : null;
+
         const saveData = {
-            state: this.sceneManager.currentSceneId,
-            index: this.sceneManager.currentIndex
+            version: '2.0',
+            timestamp: Date.now(),
+            sceneId: this.sceneManager.currentSceneId,
+            index: this.sceneManager.currentIndex,
+            // 保存当前步骤的关键信息
+            currentBg: currentStep?.bg || null,
+            currentName: currentStep?.name || null,
+            currentText: currentStep?.text || null,
+            currentChar: currentStep?.char || null
         };
         
-        localStorage.setItem('grace_save', JSON.stringify(saveData));
+        try {
+            localStorage.setItem('grace_save', JSON.stringify(saveData));
+            this.eventSystem.emit('game:autosaved', saveData);
+        } catch (error) {
+            console.error('Failed to auto-save game:', error);
+        }
+    }
+
+    // 保存游戏
+    save(event) {
+        // 阻止事件冒泡，避免触发点击继续
+        if (event) {
+            event.stopPropagation();
+        }
+
+        // 获取当前步骤信息
+        const currentStep = this.sceneManager.currentScene && 
+                           this.sceneManager.currentIndex >= 0 &&
+                           this.sceneManager.currentIndex < this.sceneManager.currentScene.length
+                           ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
+                           : null;
+
+        const saveData = {
+            version: '2.0',
+            timestamp: Date.now(),
+            sceneId: this.sceneManager.currentSceneId,
+            index: this.sceneManager.currentIndex,
+            // 保存当前步骤的关键信息
+            currentBg: currentStep?.bg || null,
+            currentName: currentStep?.name || null,
+            currentText: currentStep?.text || null,
+            currentChar: currentStep?.char || null
+        };
         
-        // 显示保存提示
-        const box = document.getElementById('dialog-box');
-        if (box) {
-            box.style.background = 'rgba(255,255,255,0.2)';
-            setTimeout(() => box.style.background = 'var(--theme-glass)', 200);
+        try {
+            localStorage.setItem('grace_save', JSON.stringify(saveData));
+            
+            // 显示保存成功提示
+            this.showSaveLoadMessage('游戏已保存', true);
+            
+            this.eventSystem.emit('game:saved', saveData);
+        } catch (error) {
+            console.error('Failed to save game:', error);
+            this.showSaveLoadMessage('保存失败', false);
+        }
+    }
+
+    // 显示保存/加载消息
+    showSaveLoadMessage(message, isSuccess) {
+        const textEl = document.getElementById('ui-text');
+        if (!textEl) return;
+
+        const originalText = textEl.textContent;
+        const originalColor = textEl.style.color;
+        
+        textEl.textContent = message;
+        textEl.style.color = isSuccess ? '#4ade80' : '#f87171';
+        textEl.style.fontWeight = 'bold';
+        
+        // 清除之前的定时器
+        if (this.saveLoadTimer) {
+            clearTimeout(this.saveLoadTimer);
         }
         
-        this.eventSystem.emit('game:saved', saveData);
+        // 设置新的定时器
+        this.saveLoadTimer = setTimeout(() => {
+            textEl.textContent = originalText;
+            textEl.style.color = originalColor;
+            textEl.style.fontWeight = '';
+            this.saveLoadTimer = null;
+        }, 1500);
     }
 
     // 加载游戏
-    async load() {
+    async load(event) {
+        // 阻止事件冒泡
+        if (event) {
+            event.stopPropagation();
+        }
+
         const raw = localStorage.getItem('grace_save');
         if (!raw) {
-            // 处理加载失败
-            const subtitle = document.querySelector('.game-over-subtitle');
-            if (subtitle) {
-                subtitle.innerHTML = '我说了Coming Soon你尔多隆吗';
-            }
-            this.death();
+            // 处理加载失败 - 没有存档
+            this.showSaveLoadMessage('没有找到存档', false);
             return;
         }
 
         try {
             const saveData = JSON.parse(raw);
             
+            // 验证存档数据
+            if (!saveData.sceneId || saveData.index === undefined) {
+                // 兼容旧版存档格式
+                if (saveData.state) {
+                    saveData.sceneId = saveData.state;
+                } else {
+                    throw new Error('Invalid save data format');
+                }
+            }
+
+            // 检查场景是否存在
+            if (!this.data[saveData.sceneId]) {
+                throw new Error(`Scene not found: ${saveData.sceneId}`);
+            }
+
             // 显示加载进度条
             this.renderer.showLoading();
             
             // 预加载保存点所在场景的资源
-            const sceneId = saveData.state;
-            const scene = this.data[sceneId];
+            const scene = this.data[saveData.sceneId];
             if (scene) {
                 await this.preloadSceneResources(scene, '加载游戏数据...');
             }
             
-            this.sceneManager.setCurrentState(saveData.state, saveData.index);
-            this.start();
-            this.eventSystem.emit('game:loaded', saveData);
+            // 隐藏菜单和难度选择
+            const menu = document.getElementById('menu-screen');
+            const difficultyLayer = document.getElementById('difficulty-layer');
+            const gameScreen = document.getElementById('game-screen');
+            const deathLayer = document.getElementById('death-layer');
+            
+            if (menu) {
+                menu.style.opacity = '0';
+                menu.style.pointerEvents = 'none';
+            }
+            if (difficultyLayer) {
+                difficultyLayer.style.display = 'none';
+            }
+            if (deathLayer) {
+                deathLayer.style.display = 'none';
+            }
+            if (gameScreen) {
+                gameScreen.style.display = 'block';
+                gameScreen.style.opacity = '1';
+            }
+            
+            // 恢复游戏状态
+            this.sceneManager.setCurrentState(saveData.sceneId, saveData.index);
+            
+            // 渲染当前步骤（加载时跳过打字效果）
+            const currentStep = this.sceneManager.currentScene[this.sceneManager.currentIndex];
+            if (currentStep) {
+                // 如果是对话步骤，直接显示完整文本
+                if (currentStep.text) {
+                    const charData = this.characters[currentStep.name];
+                    if (currentStep.bg) {
+                        this.renderer.renderBackground(currentStep.bg);
+                    }
+                    this.renderer.renderCharacter(currentStep, charData);
+                    this.handleDialogue(currentStep, true); // 跳过打字效果
+                } else {
+                    // 其他类型的步骤正常渲染
+                    await this.renderStep(currentStep);
+                }
+            }
             
             // 隐藏加载进度条
             this.renderer.hideLoading();
+            
+            // 显示加载成功提示
+            this.showSaveLoadMessage('游戏已加载', true);
+            
+            this.eventSystem.emit('game:loaded', saveData);
         } catch (error) {
             console.error('Error loading game:', error);
             this.renderer.hideLoading();
-            this.death();
+            this.showSaveLoadMessage('加载失败：存档可能已损坏', false);
         }
     }
 
