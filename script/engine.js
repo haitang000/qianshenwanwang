@@ -70,16 +70,33 @@ class Renderer {
             loadingLayer: document.getElementById('loading-layer'),
             loadingProgress: document.querySelector('.loading-progress'),
             loadingPercentage: document.querySelector('.loading-percentage'),
-            loadingText: document.querySelector('.loading-text')
+            loadingText: document.querySelector('.loading-text'),
+            circleProgress: document.querySelector('.circle-progress'),
+            loadingTips: document.querySelector('.loading-tips')
         };
+        this.tips = [
+            "每一条因果线的选择都将指向不可逃避的终焉。",
+            "系统提示：跳过剧情可能会导致因果线断裂。",
+            "虚空并不是敌人。它是这个世界的另一面。",
+            "正在同步多维宇宙观测数据...",
+            "正在纠正因果偏移量...",
+            "小心那些穿透暗影帷幕的视线。"
+        ];
     }
 
     // 渲染加载进度条
     renderLoadingProgress(progress, text = '加载中...') {
-        if (this.elements.loadingProgress && this.elements.loadingPercentage) {
-            const percent = Math.min(100, Math.max(0, progress));
+        const percent = Math.min(100, Math.max(0, progress));
+
+        if (this.elements.loadingProgress) {
             this.elements.loadingProgress.style.width = `${percent}%`;
+        }
+        if (this.elements.loadingPercentage) {
             this.elements.loadingPercentage.textContent = `${percent}%`;
+        }
+        if (this.elements.circleProgress) {
+            const offset = 283 - (283 * percent / 100);
+            this.elements.circleProgress.style.strokeDashoffset = offset;
         }
         if (this.elements.loadingText) {
             this.elements.loadingText.textContent = text;
@@ -90,6 +107,13 @@ class Renderer {
     showLoading() {
         if (this.elements.loadingLayer) {
             this.elements.loadingLayer.style.display = 'flex';
+
+            // 随机显示一条提示
+            if (this.elements.loadingTips) {
+                const randomTip = this.tips[Math.floor(Math.random() * this.tips.length)];
+                this.elements.loadingTips.textContent = `系统提示：${randomTip}`;
+            }
+
             this.renderLoadingProgress(0);
         }
     }
@@ -174,15 +198,38 @@ class Renderer {
         this.elements.textEl.innerText = "";
 
         let i = 0;
-        const timer = setInterval(() => {
-            this.elements.textEl.innerText += text[i++];
-            if (i >= text.length) {
-                clearInterval(timer);
+        let lastTime = 0;
+        const speed = 40; // ms per char
+
+        const type = (timestamp) => {
+            if (!this._currentTypingRef) return; // 检查是否已被取消
+
+            if (!lastTime) lastTime = timestamp;
+            const elapsed = timestamp - lastTime;
+
+            if (elapsed >= speed) {
+                this.elements.textEl.innerText += text[i++];
+                lastTime = timestamp;
+            }
+
+            if (i < text.length) {
+                this._currentTypingRef = requestAnimationFrame(type);
+            } else {
+                this._currentTypingRef = null;
                 if (onComplete) onComplete();
             }
-        }, 40);
+        };
 
-        return timer;
+        this._currentTypingRef = requestAnimationFrame(type);
+        return this._currentTypingRef;
+    }
+
+    // 取消当前打字效果
+    cancelTyping() {
+        if (this._currentTypingRef) {
+            cancelAnimationFrame(this._currentTypingRef);
+            this._currentTypingRef = null;
+        }
     }
 
     // 渲染选择
@@ -319,12 +366,25 @@ class ResourceManager {
             let retries = 0;
             const loadImage = () => {
                 const img = new Image();
-                img.onload = () => {
-                    this.cache.set(url, img);
-                    this.loadingQueue.delete(url);
-                    this.loadedResources++;
-                    this.updateProgress();
-                    resolve(img);
+                img.onload = async () => {
+                    try {
+                        // 使用 decode() 异步解码图片，避免主线程在渲染时卡顿
+                        if ('decode' in img) {
+                            await img.decode();
+                        }
+                        this.cache.set(url, img);
+                        this.loadingQueue.delete(url);
+                        this.loadedResources++;
+                        this.updateProgress();
+                        resolve(img);
+                    } catch (e) {
+                        console.warn(`Decoding failed for ${url}, fallback to standard load.`, e);
+                        this.cache.set(url, img);
+                        this.loadingQueue.delete(url);
+                        this.loadedResources++;
+                        this.updateProgress();
+                        resolve(img);
+                    }
                 };
                 img.onerror = () => {
                     retries++;
@@ -349,17 +409,24 @@ class ResourceManager {
     // 预加载场景资源
     async preloadScene(sceneData) {
         const resources = [];
-        
+
         // 收集场景中的所有资源
         sceneData.forEach(step => {
             if (step.bg) resources.push(step.bg);
-            // TODO: 收集角色图片资源
+
+            // 收集角色图片资源
+            if (step.char) {
+                const charName = step.char.name || step.name;
+                const sprite = step.char.sprite || 'neutral';
+                const basePath = charName === '往昔.' ? 'assets/characters/wangxi/' : '';
+                resources.push(`${basePath}${sprite}.png`);
+            }
         });
 
         // 去重并加载
         const uniqueResources = [...new Set(resources)];
         const promises = uniqueResources.map(url => this.preloadImage(url));
-        
+
         try {
             await Promise.all(promises);
             return true;
@@ -591,29 +658,29 @@ class Engine {
     // 预加载初始资源
     async preloadInitialResources() {
         const resourcesToLoad = [];
-        
+
         // 收集需要预加载的资源
         if (STORY.intro && STORY.intro[0] && STORY.intro[0].bg) {
             resourcesToLoad.push(STORY.intro[0].bg);
         }
-        
+
         // 添加角色图片资源
         for (const [name, char] of Object.entries(this.characters)) {
             if (char.img) {
                 resourcesToLoad.push(char.img);
             }
         }
-        
+
         // 如果没有资源需要加载，直接返回
         if (resourcesToLoad.length === 0) {
             return;
         }
-        
+
         // 注册进度回调
         const removeCallback = this.resourceManager.onProgress((progress) => {
             this.renderer.renderLoadingProgress(progress, '初始化资源...');
         });
-        
+
         try {
             // 并行加载所有资源
             const promises = resourcesToLoad.map(url => this.resourceManager.preloadImage(url));
@@ -651,12 +718,12 @@ class Engine {
             case 'hard':
                 // 显示加载进度条
                 this.renderer.showLoading();
-                
+
                 // 预加载intro场景的资源
                 if (STORY.intro) {
                     await this.preloadSceneResources(STORY.intro, '加载游戏场景...');
                 }
-                
+
                 if (gameScreen) {
                     gameScreen.style.display = 'block';
                     setTimeout(() => {
@@ -686,7 +753,7 @@ class Engine {
             if (this.saveLoadTimer) {
                 clearTimeout(this.saveLoadTimer);
                 this.saveLoadTimer = null;
-                
+
                 // 恢复文本颜色和样式
                 const textEl = document.getElementById('ui-text');
                 if (textEl) {
@@ -694,7 +761,7 @@ class Engine {
                     textEl.style.fontWeight = '';
                 }
             }
-            
+
             // 如果正在打字，直接完成打字
             if (this.typing) {
                 this.finishType();
@@ -762,16 +829,16 @@ class Engine {
         this.renderer.renderChoices(choices, (choice) => {
             this.inputManager.unlock();
             this.isLocked = false;
-            
+
             // 处理选择后的逻辑
             if (choice.next) {
                 this.sceneManager.currentSceneId = choice.next;
                 this.next();
             }
-            
+
             // 选择完成后自动保存
             this.autoSave();
-            
+
             this.eventSystem.emit('choice:selected', choice);
         });
     }
@@ -779,22 +846,22 @@ class Engine {
     async handleSceneTransition(nextSceneId) {
         // 自动保存当前状态
         this.autoSave();
-        
+
         // 显示加载进度条
         this.renderer.showLoading();
-        
+
         // 预加载目标场景的资源
         const targetScene = this.data[nextSceneId];
         if (targetScene) {
             await this.preloadSceneResources(targetScene, '加载新场景...');
         }
-        
+
         // 切换场景
         this.sceneManager.currentSceneId = nextSceneId;
-        
+
         // 隐藏加载进度条
         this.renderer.hideLoading();
-        
+
         // 继续游戏
         this.next();
         this.eventSystem.emit('scene:transition', nextSceneId);
@@ -802,10 +869,10 @@ class Engine {
 
     handleDialogue(step, skipTyping = false) {
         const charData = this.characters[step.name];
-        
+
         // 渲染角色
         this.renderer.renderCharacter(step, charData);
-        
+
         // 渲染对话
         if (skipTyping) {
             // 直接显示完整文本（用于加载游戏时）
@@ -827,34 +894,34 @@ class Engine {
             clearInterval(this.typingTimer);
             this.typingTimer = null;
         }
-        
+
         // 确保当前台词的完整文本显示出来
-        const currentStep = this.sceneManager.currentScene && 
-                           this.sceneManager.currentIndex >= 0 &&
-                           this.sceneManager.currentIndex < this.sceneManager.currentScene.length
-                           ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
-                           : null;
-        
+        const currentStep = this.sceneManager.currentScene &&
+            this.sceneManager.currentIndex >= 0 &&
+            this.sceneManager.currentIndex < this.sceneManager.currentScene.length
+            ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
+            : null;
+
         if (currentStep && currentStep.text) {
             this.renderer.renderDialogue(currentStep.text, currentStep.name);
         }
-        
+
         this.typing = false;
-        
+
         // 对话完成后自动保存
         this.autoSave();
-        
+
         this.eventSystem.emit('typing:finished');
     }
 
     // 自动保存游戏（无UI提示）
     autoSave() {
         // 获取当前步骤信息
-        const currentStep = this.sceneManager.currentScene && 
-                           this.sceneManager.currentIndex >= 0 &&
-                           this.sceneManager.currentIndex < this.sceneManager.currentScene.length
-                           ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
-                           : null;
+        const currentStep = this.sceneManager.currentScene &&
+            this.sceneManager.currentIndex >= 0 &&
+            this.sceneManager.currentIndex < this.sceneManager.currentScene.length
+            ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
+            : null;
 
         const saveData = {
             version: '2.0',
@@ -867,7 +934,7 @@ class Engine {
             currentText: currentStep?.text || null,
             currentChar: currentStep?.char || null
         };
-        
+
         try {
             localStorage.setItem('grace_save', JSON.stringify(saveData));
             this.eventSystem.emit('game:autosaved', saveData);
@@ -884,11 +951,11 @@ class Engine {
         }
 
         // 获取当前步骤信息
-        const currentStep = this.sceneManager.currentScene && 
-                           this.sceneManager.currentIndex >= 0 &&
-                           this.sceneManager.currentIndex < this.sceneManager.currentScene.length
-                           ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
-                           : null;
+        const currentStep = this.sceneManager.currentScene &&
+            this.sceneManager.currentIndex >= 0 &&
+            this.sceneManager.currentIndex < this.sceneManager.currentScene.length
+            ? this.sceneManager.currentScene[this.sceneManager.currentIndex]
+            : null;
 
         const saveData = {
             version: '2.0',
@@ -901,13 +968,13 @@ class Engine {
             currentText: currentStep?.text || null,
             currentChar: currentStep?.char || null
         };
-        
+
         try {
             localStorage.setItem('grace_save', JSON.stringify(saveData));
-            
+
             // 显示保存成功提示
             this.showSaveLoadMessage('游戏已保存', true);
-            
+
             this.eventSystem.emit('game:saved', saveData);
         } catch (error) {
             console.error('Failed to save game:', error);
@@ -922,16 +989,16 @@ class Engine {
 
         const originalText = textEl.textContent;
         const originalColor = textEl.style.color;
-        
+
         textEl.textContent = message;
         textEl.style.color = isSuccess ? '#4ade80' : '#f87171';
         textEl.style.fontWeight = 'bold';
-        
+
         // 清除之前的定时器
         if (this.saveLoadTimer) {
             clearTimeout(this.saveLoadTimer);
         }
-        
+
         // 设置新的定时器
         this.saveLoadTimer = setTimeout(() => {
             textEl.textContent = originalText;
@@ -957,7 +1024,7 @@ class Engine {
 
         try {
             const saveData = JSON.parse(raw);
-            
+
             // 验证存档数据
             if (!saveData.sceneId || saveData.index === undefined) {
                 // 兼容旧版存档格式
@@ -975,19 +1042,19 @@ class Engine {
 
             // 显示加载进度条
             this.renderer.showLoading();
-            
+
             // 预加载保存点所在场景的资源
             const scene = this.data[saveData.sceneId];
             if (scene) {
                 await this.preloadSceneResources(scene, '加载游戏数据...');
             }
-            
+
             // 隐藏菜单和难度选择
             const menu = document.getElementById('menu-screen');
             const difficultyLayer = document.getElementById('difficulty-layer');
             const gameScreen = document.getElementById('game-screen');
             const deathLayer = document.getElementById('death-layer');
-            
+
             if (menu) {
                 menu.style.opacity = '0';
                 menu.style.pointerEvents = 'none';
@@ -1002,10 +1069,10 @@ class Engine {
                 gameScreen.style.display = 'block';
                 gameScreen.style.opacity = '1';
             }
-            
+
             // 恢复游戏状态
             this.sceneManager.setCurrentState(saveData.sceneId, saveData.index);
-            
+
             // 渲染当前步骤（加载时跳过打字效果）
             const currentStep = this.sceneManager.currentScene[this.sceneManager.currentIndex];
             if (currentStep) {
@@ -1022,13 +1089,13 @@ class Engine {
                     await this.renderStep(currentStep);
                 }
             }
-            
+
             // 隐藏加载进度条
             this.renderer.hideLoading();
-            
+
             // 显示加载成功提示
             this.showSaveLoadMessage('游戏已加载', true);
-            
+
             this.eventSystem.emit('game:loaded', saveData);
         } catch (error) {
             console.error('Error loading game:', error);
@@ -1040,7 +1107,7 @@ class Engine {
     // 预加载场景资源
     async preloadSceneResources(scene, text = '加载场景资源...') {
         const resourcesToLoad = new Set();
-        
+
         // 收集场景中的所有资源
         scene.forEach(step => {
             if (step.bg) {
@@ -1055,17 +1122,17 @@ class Engine {
                 resourcesToLoad.add(imgSrc);
             }
         });
-        
+
         // 如果没有资源需要加载，直接返回
         if (resourcesToLoad.size === 0) {
             return;
         }
-        
+
         // 注册进度回调
         const removeCallback = this.resourceManager.onProgress((progress) => {
             this.renderer.renderLoadingProgress(progress, text);
         });
-        
+
         try {
             // 并行加载所有资源
             const promises = Array.from(resourcesToLoad).map(url => this.resourceManager.preloadImage(url));

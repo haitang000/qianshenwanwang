@@ -55,12 +55,45 @@
 
     <!-- 加载进度条 -->
     <div id="loading-layer">
+        <div class="loading-vignette"></div>
+        <div class="loading-scanlines"></div>
+        
         <div class="loading-container">
-            <div class="loading-text">加载中...</div>
-            <div class="loading-bar">
-                <div class="loading-progress"></div>
+            <div class="loading-header">
+                <div class="loading-brand">
+                    <span class="brand-main">CAUSALITY</span>
+                    <span class="brand-sub">OBSERVATION SYSTEM v2.0</span>
+                </div>
+                <div class="loading-status">STATUS: <span class="status-active">ACTIVE</span></div>
             </div>
-            <div class="loading-percentage">0%</div>
+            
+            <div class="loading-main">
+                <div class="loading-circle-wrap">
+                    <svg class="loading-circle-svg" viewBox="0 0 100 100">
+                        <circle class="circle-bg" cx="50" cy="50" r="45"></circle>
+                        <circle class="circle-progress" cx="50" cy="50" r="45"></circle>
+                    </svg>
+                    <div class="loading-percentage">0%</div>
+                </div>
+                <div class="loading-info">
+                    <div class="loading-text">正在初始化观测协议...</div>
+                    <div class="loading-bar">
+                        <div class="loading-progress"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading-footer">
+                <div class="loading-tips">系统提示：每一条因果线的选择都将指向不可逃避的终焉。</div>
+                <div class="loading-decorator"></div>
+            </div>
+        </div>
+
+        <div class="loading-corners">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
         </div>
     </div>
 
