@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,109 +11,115 @@
     <script src="script/engine.js"></script>
     <script src="script/performance_test.js"></script>
     <link rel="stylesheet" href="styles/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/icon/icon.svg">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
 
-<div id="stage">
-    <div class="noise"></div>
-    <div id="bg-layer" class="pan-anim"></div>
-    <div class="cinematic-overlay"></div>
+    <div id="stage">
+        <div class="noise"></div>
+        <div id="bg-layer" class="pan-anim"></div>
+        <div class="cinematic-overlay"></div>
 
-    <!-- 主菜单 -->
-    <div id="menu-screen">
-        <div class="title-block">
-            <div class="main-logo">千神万王</div>
-            <div class="sub-logo">The Spiral of Causality</div>
-        </div>
-        <div class="menu-nav">
-            <div class="nav-link" onclick="game.start()">新游戏 · NEW GAME</div>
-            <div class="nav-link" onclick="game.load()">继续观测 · CONTINUE</div>
-            <div class="nav-link" onclick="window.open('https://github.com/haitang000/qianshenwanwang', '_blank')">前往 GitHub 仓库赤石</div>
-        </div>
-    </div>
-
-    <!-- 游戏层 -->
-    <div id="game-screen" onclick="game.clickScreen(event)">
-        <!-- 立绘容器 -->
-        <div id="char-container"></div>
-
-        <!-- 对话框 -->
-        <div class="dialog-bar" id="dialog-box">
-            <div id="ui-name" class="speaker-name"></div>
-            <div id="ui-text" class="dialog-text"></div>
-            
-            <div class="mini-controls">
-                <div class="ctrl-btn" onclick="game.save(event)">SAVE</div>
-                <div class="ctrl-btn" onclick="game.load()">LOAD</div>
-                <div class="ctrl-btn" onclick="game.death()">SKIP</div>
-                <div class="ctrl-btn" onclick="location.reload()">TITLE</div>
+        <!-- 主菜单 -->
+        <div id="menu-screen">
+            <div class="title-block">
+                <div class="main-logo">千神万王</div>
+                <div class="sub-logo">The Spiral of Causality</div>
+            </div>
+            <div class="menu-nav">
+                <div class="nav-link" onclick="game.start()">新游戏 · NEW GAME</div>
+                <div class="nav-link" onclick="game.load()">继续观测 · CONTINUE</div>
+                <div class="nav-link" onclick="window.open('https://github.com/haitang000/qianshenwanwang', '_blank')">
+                    前往 GitHub 仓库赤石</div>
             </div>
         </div>
-    </div>
 
-    <div id="choice-layer"></div>
+        <!-- 游戏层 -->
+        <div id="game-screen" onclick="game.clickScreen(event)">
+            <!-- 立绘容器 -->
+            <div id="char-container"></div>
 
-    <!-- 加载进度条 -->
-    <div id="loading-layer">
-        <div class="loading-vignette"></div>
-        <div class="loading-scanlines"></div>
-        
-        <div class="loading-container">
-            <div class="loading-header">
-                <div class="loading-brand">
-                    <span class="brand-main">CAUSALITY</span>
-                    <span class="brand-sub">OBSERVATION SYSTEM v2.0</span>
+            <!-- 对话框 -->
+            <div class="dialog-bar" id="dialog-box">
+                <div id="ui-name" class="speaker-name"></div>
+                <div id="ui-text" class="dialog-text"></div>
+
+                <div class="mini-controls">
+                    <div class="ctrl-btn" onclick="game.save(event)">SAVE</div>
+                    <div class="ctrl-btn" onclick="game.load()">LOAD</div>
+                    <div class="ctrl-btn" onclick="game.death()">SKIP</div>
+                    <div class="ctrl-btn" onclick="location.reload()">TITLE</div>
                 </div>
-                <div class="loading-status">STATUS: <span class="status-active">ACTIVE</span></div>
             </div>
-            
-            <div class="loading-main">
-                <div class="loading-circle-wrap">
-                    <svg class="loading-circle-svg" viewBox="0 0 100 100">
-                        <circle class="circle-bg" cx="50" cy="50" r="45"></circle>
-                        <circle class="circle-progress" cx="50" cy="50" r="45"></circle>
-                    </svg>
-                    <div class="loading-percentage">0%</div>
+        </div>
+
+        <div id="choice-layer"></div>
+
+        <!-- 加载进度条 -->
+        <div id="loading-layer">
+            <div class="loading-vignette"></div>
+            <div class="loading-scanlines"></div>
+
+            <div class="loading-container">
+                <div class="loading-header">
+                    <div class="loading-brand">
+                        <span class="brand-main">CAUSALITY</span>
+                        <span class="brand-sub">OBSERVATION SYSTEM v2.0</span>
+                    </div>
+                    <div class="loading-status">STATUS: <span class="status-active">ACTIVE</span></div>
                 </div>
-                <div class="loading-info">
-                    <div class="loading-text">正在初始化观测协议...</div>
-                    <div class="loading-bar">
-                        <div class="loading-progress"></div>
+
+                <div class="loading-main">
+                    <div class="loading-circle-wrap">
+                        <svg class="loading-circle-svg" viewBox="0 0 100 100">
+                            <circle class="circle-bg" cx="50" cy="50" r="45"></circle>
+                            <circle class="circle-progress" cx="50" cy="50" r="45"></circle>
+                        </svg>
+                        <div class="loading-percentage">0%</div>
+                    </div>
+                    <div class="loading-info">
+                        <div class="loading-text">正在初始化观测协议...</div>
+                        <div class="loading-bar">
+                            <div class="loading-progress"></div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="loading-footer">
+                    <div class="loading-tips">系统提示：每一条因果线的选择都将指向不可逃避的终焉。</div>
+                    <div class="loading-decorator"></div>
+                </div>
             </div>
 
-            <div class="loading-footer">
-                <div class="loading-tips">系统提示：每一条因果线的选择都将指向不可逃避的终焉。</div>
-                <div class="loading-decorator"></div>
+            <div class="loading-corners">
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>
+                <div class="corner bl"></div>
+                <div class="corner br"></div>
             </div>
         </div>
 
-        <div class="loading-corners">
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
-            <div class="corner bl"></div>
-            <div class="corner br"></div>
+        <!-- 难度选择页面 -->
+        <div id="difficulty-layer">
+            <div class="difficulty-title">选择观测难度</div>
+            <div class="difficulty-options">
+                <div class="difficulty-option" onclick="game.selectDifficulty('easy')">简单</div>
+                <div class="difficulty-option" onclick="game.selectDifficulty('medium')">中等</div>
+                <div class="difficulty-option" onclick="game.selectDifficulty('hard')">困难</div>
+                <div class="difficulty-option" onclick="game.selectDifficulty('porcelain')">瓷器</div>
+            </div>
+        </div>
+
+        <div id="death-layer" onclick="location.reload()">
+            <div class="game-over-title">死</div>
+            <div class="game-over-subtitle">跳过剧情等于跳过生命<br>---我也不知道谁说的别问我</div>
         </div>
     </div>
-
-    <!-- 难度选择页面 -->
-    <div id="difficulty-layer">
-        <div class="difficulty-title">选择观测难度</div>
-        <div class="difficulty-options">
-            <div class="difficulty-option" onclick="game.selectDifficulty('easy')">简单</div>
-            <div class="difficulty-option" onclick="game.selectDifficulty('medium')">中等</div>
-            <div class="difficulty-option" onclick="game.selectDifficulty('hard')">困难</div>
-            <div class="difficulty-option" onclick="game.selectDifficulty('porcelain')">瓷器</div>
-        </div>
-    </div>
-
-    <div id="death-layer" onclick="location.reload()">
-        <div class="game-over-title">死</div>
-        <div class="game-over-subtitle">跳过剧情等于跳过生命<br>---我也不知道谁说的别问我</div>
-    </div>
-</div>
 
 </body>
+
 </html>
