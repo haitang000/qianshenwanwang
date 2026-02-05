@@ -19,6 +19,20 @@
 
 <body>
 
+    <!-- 免责声明 -->
+    <div id="disclaimer-layer">
+        <div class="disclaimer-container">
+            <div class="disclaimer-title">游戏前详阅</div>
+            <div class="disclaimer-content">
+                <p>本网站为《千神万王：因果螺旋》游戏。</p>
+                <p>本游戏包含虚构内容，所有角色、情节均为艺术创作，与现实人物、事件无关，如有雷同，纯属巧合。</p>
+                <p>游戏过程中可能包含闪烁画面等内容，请根据自身情况酌情体验。在体验游戏过程中，若感到不适，请立即停止游戏，并征求专业医疗建议。</p>
+            </div>
+            <div class="disclaimer-btn" onclick="acceptDisclaimer()">我已阅读, 进入游戏</div>
+        </div>
+        <div class="disclaimer-overlay"></div>
+    </div>
+
     <div id="stage">
         <div class="noise"></div>
         <div id="bg-layer" class="pan-anim"></div>
@@ -119,6 +133,27 @@
             <div class="game-over-subtitle">跳过剧情等于跳过生命<br>---我也不知道谁说的别问我</div>
         </div>
     </div>
+
+    <script>
+        // 免责声明处理
+        function acceptDisclaimer() {
+            const disclaimer = document.getElementById('disclaimer-layer');
+            disclaimer.classList.add('disclaimer-hidden');
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                disclaimer.style.display = 'none';
+            }, 800);
+        }
+
+        // 支持按回车键确认
+        document.addEventListener('keydown', function(e) {
+            const disclaimer = document.getElementById('disclaimer-layer');
+            if (e.key === 'Enter' && disclaimer && disclaimer.style.display !== 'none' && !disclaimer.classList.contains('disclaimer-hidden')) {
+                acceptDisclaimer();
+            }
+        });
+    </script>
 
 </body>
 
