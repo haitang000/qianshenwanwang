@@ -571,6 +571,78 @@ class PerformanceMonitor {
     }
 }
 
+// 章节追踪模块
+class ChapterTracker {
+    constructor() {
+        this.storageKey = 'qianshenwanwang_unlocked_chapters';
+        this.importantScenes = [
+            'intro',
+            'first_encounter',
+            'transition_bond_1',
+            'corridor_scene',
+            'scene_conclusion',
+            'chapter2_start',
+            'chapter2_climax',
+            'chapter3_start',
+            'chapter3_climax',
+            'chapter4_start',
+            'chapter5_start',
+            'chapter6_start',
+            'chapter7_start',
+            'chapter7_climax',
+            'chapter8_start',
+            'chapter8_climax',
+            'epilogue'
+        ];
+    }
+
+    // 获取已解锁的章节
+    getUnlockedChapters() {
+        try {
+            const unlocked = localStorage.getItem(this.storageKey);
+            return unlocked ? JSON.parse(unlocked) : [];
+        } catch (e) {
+            console.error('Failed to get unlocked chapters:', e);
+            return [];
+        }
+    }
+
+    // 解锁章节
+    unlockChapter(sceneId) {
+        if (!this.importantScenes.includes(sceneId)) {
+            return false;
+        }
+
+        try {
+            const unlocked = this.getUnlockedChapters();
+            if (!unlocked.includes(sceneId)) {
+                unlocked.push(sceneId);
+                localStorage.setItem(this.storageKey, JSON.stringify(unlocked));
+                console.log(`章节已解锁: ${sceneId}`);
+                return true;
+            }
+        } catch (e) {
+            console.error('Failed to unlock chapter:', e);
+        }
+        return false;
+    }
+
+    // 检查章节是否已解锁
+    isChapterUnlocked(sceneId) {
+        const unlocked = this.getUnlockedChapters();
+        return unlocked.includes(sceneId);
+    }
+
+    // 重置所有章节解锁状态（调试用）
+    reset() {
+        try {
+            localStorage.removeItem(this.storageKey);
+        } catch (e) {
+            console.error('Failed to reset chapters:', e);
+        }
+    }
+}
+
 // 主引擎类 - 整合所有模块
 class Engine {
     constructor() {
@@ -581,6 +653,7 @@ class Engine {
         this.resourceManager = new ResourceManager();
         this.eventSystem = new EventSystem();
         this.performanceMonitor = new PerformanceMonitor();
+        this.chapterTracker = new ChapterTracker();
 
     // 内部状态
     this.typing = false;
@@ -592,6 +665,9 @@ class Engine {
 
         // 初始化
         this.init();
+
+        // 检查是否从章节页面跳转过来
+        this.checkChapterJump();
 
         // 向后兼容 - 暴露旧版API
         this.initLegacyAPI();
@@ -861,6 +937,9 @@ class Engine {
     async handleSceneTransition(nextSceneId) {
         // 自动保存当前状态
         this.autoSave();
+
+        // 解锁当前章节
+        this.unlockCurrentChapter();
 
         // 显示加载进度条
         this.renderer.showLoading();
@@ -1222,6 +1301,82 @@ class Engine {
                 this.next();
             }
         });
+    }
+
+    // 检查是否从章节页面跳转过来
+    checkChapterJump() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        
+        if (mode === 'chapter') {
+            const targetChapter = sessionStorage.getItem('qianshenwanwang_jump_chapter');
+            if (targetChapter && this.chapterTracker.isChapterUnlocked(targetChapter)) {
+                // 清除跳转信息
+                sessionStorage.removeItem('qianshenwanwang_jump_chapter');
+                // 延迟执行跳转，确保引擎完全初始化
+                setTimeout(() => {
+                    this.startFromChapter(targetChapter);
+                }, 100);
+            }
+        }
+    }
+
+    // 从特定章节开始游戏
+    async startFromChapter(chapterId) {
+        console.log(`从章节 ${chapterId} 开始游戏`);
+        
+        try {
+            // 显示加载进度条
+            this.renderer.showLoading();
+
+            // 预加载目标场景的资源
+            const scene = this.data[chapterId];
+            if (scene) {
+                await this.preloadSceneResources(scene, '加载章节内容...');
+            }
+
+            // 隐藏菜单和难度选择
+            const menu = document.getElementById('menu-screen');
+            const difficultyLayer = document.getElementById('difficulty-layer');
+            const gameScreen = document.getElementById('game-screen');
+
+            if (menu) {
+                menu.style.opacity = '0';
+                menu.style.pointerEvents = 'none';
+            }
+            if (difficultyLayer) {
+                difficultyLayer.style.display = 'none';
+            }
+            if (gameScreen) {
+                gameScreen.style.display = 'block';
+                gameScreen.style.opacity = '1';
+            }
+
+            // 设置场景
+            this.sceneManager.currentSceneId = chapterId;
+            
+            // 隐藏加载进度条
+            this.renderer.hideLoading();
+            
+            // 开始游戏
+            this.next();
+
+            this.eventSystem.emit('game:chapterStart', chapterId);
+        } catch (error) {
+            console.error('Failed to start from chapter:', error);
+            this.renderer.hideLoading();
+        }
+    }
+
+    // 解锁当前章节（在场景切换时调用）
+    unlockCurrentChapter() {
+        const currentSceneId = this.sceneManager.currentSceneId;
+        if (currentSceneId) {
+            const unlocked = this.chapterTracker.unlockChapter(currentSceneId);
+            if (unlocked) {
+                this.eventSystem.emit('chapter:unlocked', currentSceneId);
+            }
+        }
     }
 }
 

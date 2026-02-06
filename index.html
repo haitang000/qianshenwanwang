@@ -47,6 +47,7 @@
             <div class="menu-nav">
                 <div class="nav-link" onclick="game.start()">新游戏 · NEW GAME</div>
                 <div class="nav-link" onclick="game.load()">继续观测 · CONTINUE</div>
+                <div class="nav-link" onclick="window.location.href='chapters.html'">章节回看 · CHAPTERS</div>
                 <div class="nav-link" onclick="window.open('https://github.com/haitang000/qianshenwanwang', '_blank')">
                     前往 GitHub 仓库赤石</div>
             </div>
@@ -140,11 +141,24 @@
             const disclaimer = document.getElementById('disclaimer-layer');
             disclaimer.classList.add('disclaimer-hidden');
             
+            // 标记已阅读
+            localStorage.setItem('disclaimer_accepted', 'true');
+            
             // 动画结束后移除元素
             setTimeout(() => {
                 disclaimer.style.display = 'none';
             }, 800);
         }
+
+        // 页面加载时检查是否已经阅读过免责声明
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('disclaimer_accepted') === 'true') {
+                const disclaimer = document.getElementById('disclaimer-layer');
+                if (disclaimer) {
+                    disclaimer.style.display = 'none';
+                }
+            }
+        });
 
         // 支持按回车键确认
         document.addEventListener('keydown', function(e) {

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>章节回看 - 千神万王：因果螺旋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="icon" href="assets/icon/icon.svg">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&display=swap"
+        rel="stylesheet">
+    <style>
+        /* 章节页面特定样式 */
+        #chapters-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 10%;
+            background: linear-gradient(135deg, rgba(10,10,15,0.98) 0%, rgba(20,20,30,0.95) 100%);
+            overflow-y: auto;
+        }
+
+        .chapters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(226, 192, 141, 0.3);
+        }
+
+        .chapters-title {
+            font-family: var(--font-art);
+            font-size: 3rem;
+            color: #fff;
+            letter-spacing: 0.5rem;
+            text-shadow: 0 0 30px rgba(226, 192, 141, 0.3);
+        }
+
+        .back-btn {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            padding: 10px 30px;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            letter-spacing: 0.2rem;
+        }
+
+        .back-btn:hover {
+            background: var(--theme-gold);
+            color: #000;
+            border-color: var(--theme-gold);
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            padding-bottom: 4rem;
+        }
+
+        .chapter-card {
+            position: relative;
+            padding: 2rem;
+            background: rgba(20, 20, 25, 0.6);
+            border: 1px solid rgba(226, 192, 141, 0.15);
+            border-left: 4px solid rgba(226, 192, 141, 0.3);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .chapter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, var(--theme-gold) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .chapter-card:hover::before {
+            opacity: 1;
+        }
+
+        .chapter-card:hover {
+            background: rgba(30, 30, 40, 0.8);
+            border-color: rgba(226, 192, 141, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .chapter-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+        }
+
+        .chapter-card.locked:hover {
+            transform: none;
+            background: rgba(20, 20, 25, 0.6);
+            border-color: rgba(226, 192, 141, 0.15);
+            box-shadow: none;
+        }
+
+        .chapter-number {
+            font-family: var(--font-art);
+            font-size: 0.9rem;
+            color: var(--theme-gold);
+            letter-spacing: 0.2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+
+        .chapter-name {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            letter-spacing: 0.1rem;
+        }
+
+        .chapter-desc {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.8;
+        }
+
+        .chapter-status {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-size: 0.8rem;
+            padding: 5px 15px;
+            border-radius: 2px;
+            letter-spacing: 0.1rem;
+        }
+
+        .chapter-status.unlocked {
+            background: rgba(94, 251, 110, 0.15);
+            color: #5efb6e;
+            border: 1px solid rgba(94, 251, 110, 0.3);
+        }
+
+        .chapter-status.locked {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .progress-info {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .progress-bar {
+            width: 100px;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--theme-gold);
+            transition: width 0.5s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 6rem 2rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            opacity: 0.3;
+        }
+
+        .empty-state-text {
+            font-size: 1.2rem;
+            letter-spacing: 0.2rem;
+        }
+
+        /* 滚动条样式 */
+        #chapters-screen::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chapters-screen::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+
+        #chapters-screen::-webkit-scrollbar-thumb {
+            background: rgba(226, 192, 141, 0.3);
+            border-radius: 3px;
+        }
+
+        #chapters-screen::-webkit-scrollbar-thumb:hover {
+            background: rgba(226, 192, 141, 0.5);
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+
+<body>
+    <div class="noise"></div>
+    
+    <div id="chapters-screen">
+        <div class="chapters-header">
+            <h1 class="chapters-title">章节回看</h1>
+            <div class="back-btn" onclick="goBack()">返回主菜单</div>
+        </div>
+
+        <div class="chapters-grid" id="chapters-grid">
+            <!-- 章节卡片将通过 JavaScript 动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 章节定义
+        const CHAPTERS = [
+            { id: 'intro', number: '序章', name: '两座被世界遗忘的孤岛', desc: '高二C班的角落，两个孤独的灵魂首次相遇。一个是用幻想武装自己的"光暗神王"，另一个是在阴影中寻找光明的"往昔."。' },
+            { id: 'first_encounter', number: '第一幕', name: '防御机制的失效', desc: '图书馆旧书库的意外相遇，让光暗神王的"圣域"遭遇了前所未有的危机。绷带勾住的不仅是书架，更是两颗逐渐靠近的心。' },
+            { id: 'transition_bond_1', number: '第二幕', name: '天台的对话', desc: '午后的天台，风带来了公平。两个孤独者开始分享彼此的秘密，在句号与幻想之间寻找共鸣。' },
+            { id: 'corridor_scene', number: '第三幕', name: '黄昏长廊', desc: '夕阳在走廊尽头堆积，像一场无声的火灾。萤火虫般微弱的光芒，照亮了彼此回家的路。' },
+            { id: 'scene_conclusion', number: '第一章', name: '孤独者的共鸣', desc: '【第一章·完结】世界好像真的被缝补好了一点点。左手还残留着微凉的触感，那是比虚空更真实的温暖。' },
+            { id: 'chapter2_start', number: '第二章', name: '交错的因果线', desc: '周一早晨的教室，往昔.发现了关于"虚空"传说的古籍。放学后图书馆的约定，开启了一段全新的冒险。' },
+            { id: 'chapter2_climax', number: '第二章', name: '因果的交织', desc: '【第二章·完结】黑暗消散，月光洒在地上。我们并肩而行的影子，证明了彼此不再孤单。' },
+            { id: 'chapter3_start', number: '第三章', name: '虚空的真相', desc: '古籍最后一页的地图指向学校地下室。周四放学后的探索，将揭示关于虚空与因果之核的惊人秘密。' },
+            { id: 'chapter3_climax', number: '第三章', name: '真相大白', desc: '【第三章·完结】爷爷的影像揭示了虚空的本质。原来，我一直寻找的不是力量，而是一个可以信任的伙伴。' },
+            { id: 'chapter4_start', number: '第四章', name: '因果的回响', desc: '三个月后的日常，极光展的邀请。但神秘人的出现打破了平静，图书馆的战斗中我们第一次并肩作战。' },
+            { id: 'chapter5_start', number: '第五章', name: '命运的交织', desc: '往昔.的家族秘密、黑衣人的袭击、神秘人的真实身份。当往昔.被挟持，我必须做出抉择。' },
+            { id: 'chapter6_start', number: '第六章', name: '裂缝中的观察者', desc: '神秘的转学生林默现身，他自称"裂缝的观察者"。关于爷爷、因果之核、以及守门人的真相逐渐浮出水面。' },
+            { id: 'chapter7_start', number: '第七章', name: '守门人的真相', desc: '三十年前的封印之战，爷爷的牺牲，林默的过去。戴上"共鸣之戒"，我们的灵魂真正连接在一起。' },
+            { id: 'chapter7_climax', number: '第七章', name: '共鸣之力', desc: '【第七章·完结】虚空与光明本是一体。月圆之夜的约定，将是最后的平静时光。' },
+            { id: 'chapter8_start', number: '第八章', name: '虚空试炼', desc: '虚空之眼的三重试炼：面对恐惧、坦诚秘密、做出选择。只有爱与希望，才能重新封印裂缝。' },
+            { id: 'chapter8_climax', number: '第八章', name: '新的封印', desc: '【第八章·完结】我们证明了，封印不应该是痛苦的牺牲，而是希望的开始。虚空与现实的平衡，重新建立。' },
+            { id: 'epilogue', number: '尾声', name: '新的开始', desc: '【故事完结】曾经，我们是两座被遗忘的孤岛。现在，我们彼此连接，成为了彼此的光。感谢游玩！' }
+        ];
+
+        // 获取已解锁的章节
+        function getUnlockedChapters() {
+            try {
+                const unlocked = localStorage.getItem('qianshenwanwang_unlocked_chapters');
+                return unlocked ? JSON.parse(unlocked) : [];
+            } catch (e) {
+                console.error('Failed to load unlocked chapters:', e);
+                return [];
+            }
+        }
+
+        // 渲染章节列表
+        function renderChapters() {
+            const grid = document.getElementById('chapters-grid');
+            const unlockedChapters = getUnlockedChapters();
+            
+            if (unlockedChapters.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state-icon">📖</div>
+                        <div class="empty-state-text">暂无已解锁章节</div>
+                        <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.6;">开始游戏后，章节将自动解锁</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = CHAPTERS.map(chapter => {
+                const isUnlocked = unlockedChapters.includes(chapter.id);
+                const progress = isUnlocked ? 100 : 0;
+                
+                return `
+                    <div class="chapter-card ${isUnlocked ? '' : 'locked'}" 
+                         onclick="${isUnlocked ? `playChapter('${chapter.id}')` : ''}">
+                        <div class="chapter-number">${chapter.number}</div>
+                        <div class="chapter-status ${isUnlocked ? 'unlocked' : 'locked'}">
+                            ${isUnlocked ? '已解锁' : '未解锁'}
+                        </div>
+                        <h2 class="chapter-name">${chapter.name}</h2>
+                        <p class="chapter-desc">${chapter.desc}</p>
+                        <div class="progress-info">
+                            <span class="progress-text">${isUnlocked ? '点击开始回看' : '通关后解锁'}</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 播放章节
+        function playChapter(chapterId) {
+            // 保存要跳转的章节到 sessionStorage
+            sessionStorage.setItem('qianshenwanwang_jump_chapter', chapterId);
+            // 跳转到主游戏页面
+            window.location.href = 'index.html?mode=chapter';
+        }
+
+        // 返回主菜单
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChapters();
+        });
+    </script>
+</body>
+
+</html>
