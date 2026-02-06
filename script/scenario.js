@@ -3200,7 +3200,31 @@ STORY.epilogue = [
   },
   {
     name: '系统',
-    text: '——《千神万妄》制作组'
+    text: '——《千神万王》制作组'
+  },
+  {
+    name: '制作人',
+    text: '海棠络合物'
+  },
+  {
+    name: '主美',
+    text: '有所期待的喜悦ovo、Nano Banana Pro'
+  },
+  {
+    name: '主程',
+    text: '海棠络合物、Gemini 3 Flash、Gemini 3 Pro、Claude Opus 4.5、Kimi K2.5'
+  },
+  {
+    name: '剧情编写',
+    text: '海棠络合物、Gemini 3 Flash、Gemini 3 Pro、Kimi K2.5、GLM 4.7'
+  },
+  {
+    name: '特别鸣谢',
+    text: 'zhtzhang2024、迸射n、Sailyn Becker'
+  },
+  {
+    name: '特别鸣谢',
+    text: 'And You.'
   }
 ];
 

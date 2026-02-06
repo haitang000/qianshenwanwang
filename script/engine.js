@@ -141,7 +141,8 @@ class Renderer {
             this.elements.nameEl.style.color = charData.theme;
         }
         if (this.elements.dialogBox) {
-            this.elements.dialogBox.style.borderLeftColor = charData.theme;
+            this.elements.
+            dialogBox.style.borderLeftColor = charData.theme;
         }
 
         // 处理角色立绘
@@ -194,28 +195,36 @@ class Renderer {
     renderTypingEffect(text, name, onComplete) {
         if (!this.elements.textEl || !this.elements.nameEl) return;
 
+        // 先取消之前的打字效果
+        this.cancelTyping();
+
         this.elements.nameEl.innerText = name || "";
         this.elements.textEl.innerText = "";
 
         let i = 0;
         let lastTime = 0;
         const speed = 40; // ms per char
+        this._currentTypingText = text; // 保存当前正在打印的文本
 
         const type = (timestamp) => {
-            if (!this._currentTypingRef) return; // 检查是否已被取消
+            // 检查是否已被取消或文本已更改
+            if (!this._currentTypingRef || this._currentTypingText !== text) return;
 
             if (!lastTime) lastTime = timestamp;
             const elapsed = timestamp - lastTime;
 
             if (elapsed >= speed) {
-                this.elements.textEl.innerText += text[i++];
-                lastTime = timestamp;
+                if (i < text.length) {
+                    this.elements.textEl.innerText += text[i++];
+                    lastTime = timestamp;
+                }
             }
 
             if (i < text.length) {
                 this._currentTypingRef = requestAnimationFrame(type);
             } else {
                 this._currentTypingRef = null;
+                this._currentTypingText = null;
                 if (onComplete) onComplete();
             }
         };
@@ -230,6 +239,7 @@ class Renderer {
             cancelAnimationFrame(this._currentTypingRef);
             this._currentTypingRef = null;
         }
+        this._currentTypingText = null;
     }
 
     // 渲染选择
@@ -572,12 +582,13 @@ class Engine {
         this.eventSystem = new EventSystem();
         this.performanceMonitor = new PerformanceMonitor();
 
-        // 内部状态
-        this.typing = false;
-        this.typingTimer = null;
-        this.saveLoadTimer = null;
-        this.isLocked = false;
-        this.characters = CHARACTERS;
+    // 内部状态
+    this.typing = false;
+    this.typingTimer = null;
+    this.saveLoadTimer = null;
+    this.isLocked = false;
+    this.isProcessing = false; // 防重复点击标志
+    this.characters = CHARACTERS;
 
         // 初始化
         this.init();
@@ -744,8 +755,9 @@ class Engine {
     }
 
     async next() {
-        if (this.isLocked) return;
-
+        if (this.isLocked || this.isProcessing) return;
+        
+        this.isProcessing = true;
         this.performanceMonitor.startTimer('stepTime');
 
         try {
@@ -762,21 +774,23 @@ class Engine {
                 }
             }
 
-            // 如果正在打字，直接完成打字
+            // 如果正在打字，直接完成打字，然后继续下一步
             if (this.typing) {
+                this.renderer.cancelTyping();
                 this.finishType();
-                return;
-            }
+                // 注意：这里不返回，继续执行后面的代码来进入下一步
+            } else {
+                // 只有在没有打字时才获取下一步
+                const step = this.sceneManager.getNextStep();
+                if (!step) {
+                    // 场景结束
+                    this.eventSystem.emit('scene:end', this.sceneManager.currentSceneId);
+                    return;
+                }
 
-            const step = this.sceneManager.getNextStep();
-            if (!step) {
-                // 场景结束
-                this.eventSystem.emit('scene:end', this.sceneManager.currentSceneId);
-                return;
+                await this.renderStep(step);
+                this.eventSystem.emit('step:rendered', step);
             }
-
-            await this.renderStep(step);
-            this.eventSystem.emit('step:rendered', step);
 
         } catch (error) {
             console.error('Error in next():', error);
@@ -785,6 +799,7 @@ class Engine {
         } finally {
             const stepTime = this.performanceMonitor.endTimer('stepTime');
             this.performanceMonitor.addMetric('stepTime', stepTime);
+            this.isProcessing = false;
         }
     }
 
@@ -890,6 +905,9 @@ class Engine {
     }
 
     finishType() {
+        // 先标记打字结束，防止递归
+        this.typing = false;
+        
         if (this.typingTimer) {
             clearInterval(this.typingTimer);
             this.typingTimer = null;
@@ -905,11 +923,6 @@ class Engine {
         if (currentStep && currentStep.text) {
             this.renderer.renderDialogue(currentStep.text, currentStep.name);
         }
-
-        this.typing = false;
-
-        // 对话完成后自动保存
-        this.autoSave();
 
         this.eventSystem.emit('typing:finished');
     }
