@@ -3,6 +3,7 @@ const STORY = {
   intro: [
     {
       bg: 'https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?auto=format&fit=crop&w=1920&q=80',
+      music: 'night',
       name: '系统',
       text: '高二C班，是一个被喧嚣统治的领地。'
     },

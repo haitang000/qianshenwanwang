@@ -80,7 +80,9 @@ class Renderer {
             "虚空并不是敌人。它是这个世界的另一面。",
             "正在同步多维宇宙观测数据...",
             "正在纠正因果偏移量...",
-            "小心那些穿透暗影帷幕的视线。"
+            "小心那些穿透暗影帷幕的视线。",
+            "Hello World!"
+
         ];
     }
 
@@ -571,8 +573,168 @@ class PerformanceMonitor {
     }
 }
 
+// 音乐管理模块
+class MusicManager {
+    constructor() {
+        this.currentAudio = null;
+        this.currentMusic = null;
+        this.volume = 0.5;
+        this.isMuted = false;
+        this.basePath = 'assets/musics/';
+        
+        // 预定义音乐映射
+        this.musicMap = {
+            'attachment': 'attachment.mp3',
+            'happy': 'happy.mp3',
+            'night': 'night.mp3',
+            'pity': 'pity.mp3'
+        };
+    }
+
+    // 播放音乐
+    play(musicName, options = {}) {
+        const fadeDuration = options.fadeDuration || 1000;
+        const loop = options.loop !== false; // 默认循环播放
+        
+        // 如果已经在播放同一首音乐，不做任何操作
+        if (this.currentMusic === musicName && this.currentAudio) {
+            return;
+        }
+
+        const musicFile = this.musicMap[musicName] || musicName;
+        const audioPath = this.basePath + musicFile;
+
+        // 创建新的音频对象
+        const newAudio = new Audio(audioPath);
+        newAudio.loop = loop;
+        newAudio.volume = 0;
+        newAudio.preload = 'auto';
+
+        // 处理音频加载错误
+        newAudio.onerror = () => {
+            console.warn(`Failed to load music: ${audioPath}`);
+        };
+
+        // 如果当前有音乐在播放，先淡出
+        if (this.currentAudio) {
+            this.fadeOut(this.currentAudio, fadeDuration, () => {
+                this.currentAudio.pause();
+                this.currentAudio = null;
+            });
+        }
+
+        // 播放新音乐并淡入
+        newAudio.play().then(() => {
+            this.fadeIn(newAudio, fadeDuration);
+            this.currentAudio = newAudio;
+            this.currentMusic = musicName;
+        }).catch(err => {
+            console.warn('Music playback failed:', err);
+        });
+    }
+
+    // 停止播放
+    stop(fadeDuration = 1000) {
+        if (this.currentAudio) {
+            this.fadeOut(this.currentAudio, fadeDuration, () => {
+                this.currentAudio.pause();
+                this.currentAudio = null;
+                this.currentMusic = null;
+            });
+        }
+    }
+
+    // 暂停播放
+    pause() {
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+        }
+    }
+
+    // 恢复播放
+    resume() {
+        if (this.currentAudio && this.currentAudio.paused) {
+            this.currentAudio.play().catch(err => {
+                console.warn('Music resume failed:', err);
+            });
+        }
+    }
+
+    // 设置音量
+    setVolume(volume) {
+        this.volume = Math.max(0, Math.min(1, volume));
+        if (this.currentAudio) {
+            this.currentAudio.volume = this.isMuted ? 0 : this.volume;
+        }
+    }
+
+    // 获取当前音量
+    getVolume() {
+        return this.volume;
+    }
+
+    // 静音切换
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        if (this.currentAudio) {
+            this.currentAudio.volume = this.isMuted ? 0 : this.volume;
+        }
+        return this.isMuted;
+    }
+
+    // 淡入效果
+    fadeIn(audio, duration) {
+        const startTime = Date.now();
+        const targetVolume = this.isMuted ? 0 : this.volume;
+        
+        const fade = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            
+            if (audio) {
+                audio.volume = targetVolume * progress;
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(fade);
+            }
+        };
+        
+        requestAnimationFrame(fade);
+    }
+
+    // 淡出效果
+    fadeOut(audio, duration, callback) {
+        const startTime = Date.now();
+        const startVolume = audio.volume;
+        
+        const fade = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            
+            if (audio) {
+                audio.volume = startVolume * (1 - progress);
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(fade);
+            } else if (callback) {
+                callback();
+            }
+        };
+        
+        requestAnimationFrame(fade);
+    }
+
+    // 获取当前播放的音乐名称
+    getCurrentMusic() {
+        return this.currentMusic;
+    }
+}
+
 // 章节追踪模块
 class ChapterTracker {
+
     constructor() {
         this.storageKey = 'qianshenwanwang_unlocked_chapters';
         this.importantScenes = [
@@ -654,14 +816,15 @@ class Engine {
         this.eventSystem = new EventSystem();
         this.performanceMonitor = new PerformanceMonitor();
         this.chapterTracker = new ChapterTracker();
+        this.musicManager = new MusicManager();
 
-    // 内部状态
-    this.typing = false;
-    this.typingTimer = null;
-    this.saveLoadTimer = null;
-    this.isLocked = false;
-    this.isProcessing = false; // 防重复点击标志
-    this.characters = CHARACTERS;
+        // 内部状态
+        this.typing = false;
+        this.typingTimer = null;
+        this.saveLoadTimer = null;
+        this.isLocked = false;
+        this.isProcessing = false; // 防重复点击标志
+        this.characters = CHARACTERS;
 
         // 初始化
         this.init();
@@ -883,6 +1046,11 @@ class Engine {
         this.performanceMonitor.startTimer('renderTime');
 
         try {
+            // 处理背景音乐
+            if (step.music) {
+                this.musicManager.play(step.music, { fadeDuration: 1500 });
+            }
+
             // 处理背景
             if (step.bg) {
                 this.renderer.renderBackground(step.bg);

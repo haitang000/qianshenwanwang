@@ -68,6 +68,7 @@
                     <div class="ctrl-btn" onclick="game.load()">LOAD</div>
                     <div class="ctrl-btn" onclick="game.death()">SKIP</div>
                     <div class="ctrl-btn" onclick="location.reload()">TITLE</div>
+                    <div class="ctrl-btn" onclick="toggleMusicMute()" id="music-btn">♪</div>
                 </div>
             </div>
         </div>
@@ -167,6 +168,18 @@
                 acceptDisclaimer();
             }
         });
+
+        // 音乐静音切换
+        function toggleMusicMute() {
+            if (window.game && window.game.musicManager) {
+                const isMuted = window.game.musicManager.toggleMute();
+                const btn = document.getElementById('music-btn');
+                if (btn) {
+                    btn.textContent = isMuted ? '♪' : '♪';
+                    btn.style.opacity = isMuted ? '0.5' : '1';
+                }
+            }
+        }
     </script>
 
 </body>
