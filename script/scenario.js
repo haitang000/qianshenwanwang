@@ -57,7 +57,8 @@ const STORY = {
     },
     {
       name: '光暗神王',
-      text: '（我们只是两个尴尬的错别字，并列在这里。）'
+      text: '（我们只是两个尴尬的错别字，并列在这里。）',
+      music: 'clear'
     },
     { next: 'first_encounter' }
   ],
@@ -112,6 +113,7 @@ const STORY = {
       text: '（我低头一看，越扯越紧。尊严正在木刺上支离破碎。）'
     },
     {
+      music: 'warm',
       name: '往昔.',
       text: '“别动，会扯疼的。”'
     },
@@ -125,7 +127,8 @@ const STORY = {
     },
     {
       name: '光暗神王',
-      text: '（我那颗满是尖刺的心，突然缩了一下。）'
+      text: '（我那颗满是尖刺的心，突然缩了一下。）',
+      music: 'clear'
     },
     { next: 'transition_bond_1' }
   ],
@@ -134,6 +137,7 @@ const STORY = {
   transition_bond_1: [
     {
       bg: 'https://images.unsplash.com/photo-1508182314998-3bd49473002f?auto=format&fit=crop&w=1920&q=80',
+      music: 'warm',
       name: '系统',
       text: '几天后的午休。天台铁门在风中吱呀作响。'
     },
@@ -200,6 +204,7 @@ const STORY = {
   corridor_scene: [
     {
       bg: 'https://images.unsplash.com/photo-1541829070764-84a7d30dee62?auto=format&fit=crop&w=1920&q=80',
+      music: 'pity',
       name: '系统',
       text: '放学后的黄昏。夕阳在走廊尽头堆积，像一场无声的火灾。'
     },
@@ -214,7 +219,8 @@ const STORY = {
     {
       name: '往昔.',
       char: { name: '往昔.', sprite: 'akimbo' },
-      text: '“我知道，是神王大人的‘垂青’，对吧？”'
+      text: '“我知道，是神王大人的‘垂青’，对吧？”',
+      music: 'happy'
     },
     {
       name: '光暗神王',
@@ -2807,12 +2813,17 @@ STORY.trial3_start = [
   {
     choice: [
       {
-        text: "“我选择牺牲自己。往昔.，活下去。”",
+        text: "“牺牲自己”",
         next: "sacrifice_self",
         love: 50
       },
       {
-        text: "“一定有第三个选择！我们要一起活下去！",
+        text: "牺牲往昔",
+        next: "sacrifice_oth",
+        love: 0
+      },
+      {
+        text: "一起活下去",
         next: "find_third_way",
         hope: 50
       }

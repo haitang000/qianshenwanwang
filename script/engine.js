@@ -81,8 +81,7 @@ class Renderer {
             "正在同步多维宇宙观测数据...",
             "正在纠正因果偏移量...",
             "小心那些穿透暗影帷幕的视线。",
-            "Hello World!"
-
+            "Hello World!"  
         ];
     }
 
@@ -587,7 +586,8 @@ class MusicManager {
             'attachment': 'attachment.mp3',
             'happy': 'happy.mp3',
             'night': 'night.mp3',
-            'pity': 'pity.mp3'
+            'pity': 'pity.mp3',
+            'warm': 'warm.mp3'
         };
     }
 
@@ -595,6 +595,12 @@ class MusicManager {
     play(musicName, options = {}) {
         const fadeDuration = options.fadeDuration || 1000;
         const loop = options.loop !== false; // 默认循环播放
+        
+        // 处理清除音乐的情况
+        if (musicName === 'clear' || musicName === 'stop') {
+            this.stop(fadeDuration);
+            return;
+        }
         
         // 如果已经在播放同一首音乐，不做任何操作
         if (this.currentMusic === musicName && this.currentAudio) {
@@ -1169,6 +1175,12 @@ class Engine {
 
         if (currentStep && currentStep.text) {
             this.renderer.renderDialogue(currentStep.text, currentStep.name);
+            
+            // 检测章节结束并自动保存
+            if (currentStep.text.includes('观测结束') || currentStep.text.includes('游戏结束')) {
+                this.autoSave();
+                console.log(`章节结束自动保存: ${this.sceneManager.currentSceneId}`);
+            }
         }
 
         this.eventSystem.emit('typing:finished');
