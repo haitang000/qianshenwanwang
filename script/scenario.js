@@ -195,7 +195,8 @@ const STORY = {
     },
     {
       name: '光暗神王',
-      text: '（名为“孤独”的石头，裂开了一丝缝隙。）'
+      text: '（名为"孤独"的石头，裂开了一丝缝隙。）',
+      music: 'clear'
     },
     { next: 'corridor_scene' }
   ],
@@ -387,7 +388,8 @@ const STORY = {
     },
     {
       name: '系统',
-      text: '【第一章·孤独者的共鸣 观测结束】'
+      text: '【第一章·孤独者的共鸣 观测结束】',
+      music: 'clear'
     },
     { next: 'chapter2_start' }
   ],
@@ -396,6 +398,7 @@ const STORY = {
   chapter2_start: [
     {
       bg: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1920&q=80',
+      music: 'entrance',
       name: '系统',
       text: '周一早晨。教室里弥漫着刚擦过的地板味和早读的琅琅书声。'
     },
@@ -457,6 +460,7 @@ const STORY = {
   library_research: [
     {
       bg: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=80',
+      music: 'warm',
       name: '系统',
       text: '放学后的图书馆。夕阳透过磨砂玻璃，把整个房间染成了温暖的橘色。'
     },
@@ -518,7 +522,8 @@ const STORY = {
     },
     {
       name: '往昔.',
-      text: '“它来了。我们必须做出选择。”'
+      text: '“它来了。我们必须做出选择。”',
+      music: 'darkness'
     },
     {
       choice: [
@@ -540,6 +545,7 @@ const STORY = {
   confrontation: [
     {
       bg: 'https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?auto=format&fit=crop&w=1920&q=80',
+      music: 'darkness',
       name: '系统',
       text: '黑暗从书架之间涌出来，凝聚成一个扭曲的身影。'
     },
@@ -589,7 +595,8 @@ const STORY = {
     },
     {
       name: '往昔.',
-      text: '“（笑）当然，神王大人。”'
+      text: '“（笑）当然，神王大人。”',
+      music: 'warm'
     },
     {
       next: "chapter2_climax"
@@ -604,12 +611,13 @@ const STORY = {
       text: '我们躲在书架后面，看着黑色影子在图书馆里游荡。'
     },
     {
-      name: '往昔.',
-      text: '“（轻声）它在找什么？”'
+      name: '系统',
+      text: '我们在洞穴中探索。水晶的光芒将一切都染成了梦幻的蓝色。',
+      music: 'entrance'
     },
     {
-      name: '光暗神王',
-      text: '“（皱眉）看起来像是在寻找某种特定的东西。”'
+      name: '往昔.',
+      text: '“看！那里有个祭坛！”'
     },
     {
       name: '往昔.',
@@ -1110,7 +1118,8 @@ const STORY = {
     },
     {
       name: '往昔.',
-      text: '“（坚定）我会一直陪着你的，神王大人。”'
+      text: '“（坚定）我会一直陪着你的，神王大人。”',
+      music: 'promise'
     },
     {
       name: '系统',
@@ -1194,7 +1203,8 @@ const STORY = {
     },
     {
       name: '系统',
-      text: '【第三章·虚空的真相 观测结束】'
+      text: '【第三章·虚空的真相 观测结束】',
+      music: 'clear'
     },
     { next: 'chapter4_start' }
   ]
@@ -1204,6 +1214,7 @@ const STORY = {
 STORY.chapter4_start = [
   {
     bg: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1920&q=80',
+    music: 'entrance',
     name: '系统',
     text: '第二天清晨，阳光透过窗帘的缝隙洒在书桌上。'
   },
@@ -1320,7 +1331,8 @@ STORY.chapter4_start = [
   },
   {
     name: '系统',
-    text: '突然，图书馆的灯熄灭了。整个古籍区陷入了黑暗。'
+    text: '突然，图书馆的灯熄灭了。整个古籍区陷入了黑暗。',
+    music: 'darkness'
   },
   {
     name: '光暗神王',
@@ -1470,17 +1482,19 @@ STORY.chapter4_start = [
     name: '系统',
     text: '夕阳透过玻璃窗洒在我们身上，仿佛在为我们加油打气。'
   },
-  {
-    name: '系统',
-    text: '【第四章·因果的回响 观测结束】'
-  },
-  { next: 'chapter5_start' }
-];
+    {
+      name: '系统',
+      text: '【第四章·因果的回响 观测结束】',
+      music: 'clear'
+    },
+    { next: 'chapter5_start' }
+  ];
 
 // 第五章：命运的交织
 STORY.chapter5_start = [
   {
     bg: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1920&q=80',
+    music: 'entrance',
     name: '系统',
     text: '周末的早晨，我坐在书桌前，思考着最近发生的一切。'
   },
@@ -1572,7 +1586,8 @@ STORY.chapter5_start = [
   },
   {
     name: '系统',
-    text: '就在这时，窗外突然闪过一道黑影。'
+    text: '就在这时，窗外突然闪过一道黑影。',
+    music: 'night'
   },
   {
     name: '光暗神王',
@@ -1703,22 +1718,23 @@ STORY.chapter5_start = [
     name: '往昔.',
     text: '“我猜他是想得到因果之核。但为什么会找到我家……”'
   },
-  {
-    name: '系统',
-    text: '突然，天空变得阴沉起来。空气中弥漫着一股压抑的气息。'
-  },
-  {
-    name: '光暗神王',
-    text: '“（惊讶）这是……虚空的气息！”'
-  },
-  {
-    name: '往昔.',
-    text: '“（紧张）难道那个神秘人来了？”'
-  },
-  {
-    name: '系统',
-    text: '远处传来了熟悉的笑声。'
-  },
+    {
+      name: '系统',
+      text: '突然，天空变得阴沉起来。空气中弥漫着一股压抑的气息。',
+      music: 'darkness'
+    },
+    {
+      name: '光暗神王',
+      text: '“（惊讶）这是……虚空的气息！”'
+    },
+    {
+      name: '往昔.',
+      text: '“（紧张）难道那个神秘人来了？”'
+    },
+    {
+      name: '系统',
+      text: '远处传来了熟悉的笑声。'
+    },
   {
     name: '神秘人',
     text: '“哈哈哈哈……你们以为能逃得掉吗？”'
@@ -1827,12 +1843,13 @@ STORY.chapter5_start = [
     name: '系统',
     text: '我们跟着神秘人，向学校的方向走去。天空越来越阴沉，仿佛预示着即将到来的暴风雨。'
   },
-  {
-    name: '系统',
-    text: '【第五章·命运的交织 观测结束】'
-  },
-  { next: 'chapter6_start' }
-];
+    {
+      name: '系统',
+      text: '【第五章·命运的交织 观测结束】',
+      music: 'clear'
+    },
+    { next: 'chapter6_start' }
+  ];
 
 // ==================== 续写剧情开始 ====================
 
@@ -1840,6 +1857,7 @@ STORY.chapter5_start = [
 STORY.chapter6_start = [
   {
     bg: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1920&q=80',
+    music: 'pity',
     name: '系统',
     text: '阴沉的天空下，我们三人向学校走去。神秘人用黑暗的力量束缚着我的双手，往昔.虚弱地跟在我身后。'
   },
@@ -1951,18 +1969,19 @@ STORY.chapter6_start = [
     name: '林默',
     text: '“因果之核的事，不需要你操心。它自然会找到真正的主人。”'
   },
-  {
-    name: '系统',
-    text: '神秘人狠狠地瞪了我们一眼，然后化作一团黑雾消失了。'
-  },
-  {
-    name: '光暗神王',
-    text: '“（松了口气）终于……走了。”'
-  },
-  {
-    name: '林默',
-    text: '“别高兴得太早。他只是暂时退却了，还会再来的。”'
-  },
+    {
+      name: '系统',
+      text: '神秘人狠狠地瞪了我们一眼，然后化作一团黑雾消失了。',
+      music: 'entrance'
+    },
+    {
+      name: '光暗神王',
+      text: '“（松了口气）终于……走了。”'
+    },
+    {
+      name: '林默',
+      text: '“别高兴得太早。他只是暂时退却了，还会再来的。”'
+    },
   {
     name: '往昔.',
     text: '“（感激）谢谢你……救了我们。”'
@@ -2055,17 +2074,19 @@ STORY.chapter6_start = [
     name: '系统',
     text: '手中的卡片被握得温热。明天，一切都会真相大白。'
   },
-  {
-    name: '系统',
-    text: '【第六章·裂缝中的观察者 观测结束】'
-  },
-  { next: 'chapter7_start' }
-];
+    {
+      name: '系统',
+      text: '【第六章·裂缝中的观察者 观测结束】',
+      music: 'clear'
+    },
+    { next: 'chapter7_start' }
+  ];
 
 // 第七章：守门人的真相
 STORY.chapter7_start = [
   {
     bg: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1920&q=80',
+    music: 'entrance',
     name: '系统',
     text: '第二天下午，我和往昔.按照地址来到了城市边缘的一座老旧书店。'
   },
@@ -2374,49 +2395,51 @@ STORY.chapter7_climax = [
     name: '林默',
     text: '“希望你们记住今天的话。”'
   },
-  {
-    name: '林默',
-    text: '“明天晚上，月圆之时，来学校地下室。我会打开通往虚空之眼的通道。”'
-  },
-  {
-    name: '林默',
-    text: '“在此之前，好好准备吧。这可能是你们最后的平静时光了。”'
-  },
-  {
-    name: '系统',
-    text: '我们离开了书店。夕阳将天空染成了血红色，仿佛预示着即将到来的风暴。'
-  },
-  {
-    name: '光暗神王',
-    text: '“往昔.，你害怕吗？”'
-  },
-  {
-    name: '往昔.',
-    text: '“有一点。但是……有你在我身边，我就不那么怕了。”'
-  },
-  {
-    name: '光暗神王',
-    text: '“我会保护你的。我发誓。”'
-  },
-  {
-    name: '系统',
-    text: '我们并肩走在回家的路上，手紧紧握在一起。'
-  },
-  {
-    name: '系统',
-    text: '无论明天会发生什么，至少此刻，我们不再孤单。'
-  },
-  {
-    name: '系统',
-    text: '【第七章·守门人的真相 观测结束】'
-  },
-  { next: 'chapter8_start' }
-];
+    {
+      name: '林默',
+      text: '“明天晚上，月圆之时，来学校地下室。我会打开通往虚空之眼的通道。”'
+    },
+    {
+      name: '林默',
+      text: '“在此之前，好好准备吧。这可能是你们最后的平静时光了。”'
+    },
+    {
+      name: '系统',
+      text: '我们离开了书店。夕阳将天空染成了血红色，仿佛预示着即将到来的风暴。'
+    },
+    {
+      name: '光暗神王',
+      text: '“往昔.，你害怕吗？”'
+    },
+    {
+      name: '往昔.',
+      text: '“有一点。但是……有你在我身边，我就不那么怕了。”'
+    },
+    {
+      name: '光暗神王',
+      text: '“我会保护你的。我发誓。”'
+    },
+    {
+      name: '系统',
+      text: '我们并肩走在回家的路上，手紧紧握在一起。'
+    },
+    {
+      name: '系统',
+      text: '无论明天会发生什么，至少此刻，我们不再孤单。'
+    },
+    {
+      name: '系统',
+      text: '【第七章·守门人的真相 观测结束】',
+      music: 'clear'
+    },
+    { next: 'chapter8_start' }
+  ];
 
 // 第八章：虚空试炼
 STORY.chapter8_start = [
   {
     bg: 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?auto=format&fit=crop&w=1920&q=80',
+    music: 'night',
     name: '系统',
     text: '月圆之夜。我们再次站在学校地下室的铁门前。'
   },
@@ -2493,14 +2516,15 @@ STORY.chapter8_start = [
     name: '系统',
     text: '我伸手想要抓住她，但已经来不及了。她被传送到另一个漂浮的岛屿上。'
   },
-  {
-    name: '虚空之声',
-    text: '“第一试炼——面对自己的恐惧。”'
-  },
-  {
-    name: '系统',
-    text: '我面前的空间开始扭曲，出现了一个熟悉的场景——我的教室。'
-  },
+    {
+      name: '虚空之声',
+      text: '“第一试炼——面对自己的恐惧。”',
+      music: 'darkness'
+    },
+    {
+      name: '系统',
+      text: '我面前的空间开始扭曲，出现了一个熟悉的场景——我的教室。'
+    },
   {
     name: '？？？',
     text: '“看啊，就是那个怪胎。整天说什么自己是神王，笑死人了。”'
@@ -2566,16 +2590,17 @@ STORY.trial1_courage = [
     name: '系统',
     text: '我举起左手，虚空的力量喷涌而出，将那些幻象击碎。'
   },
-  {
-    name: '虚空之声',
-    text: '“第一试炼，通过。”'
-  },
-  {
-    next: "trial2_start"
-  }
-];
+    {
+      name: '虚空之声',
+      text: '“第一试炼，通过。”',
+      music: 'clear'
+    },
+    {
+      next: "trial2_start"
+    }
+  ],
 
-STORY.trial1_acceptance = [
+  STORY.trial1_acceptance = [
   {
     name: '光暗神王',
     text: '“是的，我害怕。我害怕被嘲笑，害怕被排斥。”'
@@ -2592,14 +2617,15 @@ STORY.trial1_acceptance = [
     name: '系统',
     text: '虚空的力量从我体内温柔地流淌出来，包围了那些幻象，将它们慢慢消融。'
   },
-  {
-    name: '虚空之声',
-    text: '“第一试炼，通过。”'
-  },
-  {
-    next: "trial2_start"
-  }
-];
+    {
+      name: '虚空之声',
+      text: '“第一试炼，通过。”',
+      music: 'clear'
+    },
+    {
+      next: "trial2_start"
+    }
+  ];
 
 STORY.trial2_start = [
   {
@@ -2741,18 +2767,19 @@ STORY.trial2_start = [
     name: '光暗神王',
     text: '“我发誓。我们是伙伴，是……彼此的羁绊。”'
   },
-  {
-    name: '虚空之声',
-    text: '“第二试炼，通过。”'
-  },
-  {
-    name: '系统',
-    text: '星空开始旋转，我们被传送到了最后的地方。'
-  },
-  {
-    next: "trial3_start"
-  }
-];
+    {
+      name: '虚空之声',
+      text: '“第二试炼，通过。”',
+      music: 'clear'
+    },
+    {
+      name: '系统',
+      text: '星空开始旋转，我们被传送到了最后的地方。'
+    },
+    {
+      next: "trial3_start"
+    }
+  ];
 
 STORY.trial3_start = [
   {
@@ -2792,14 +2819,15 @@ STORY.trial3_start = [
     name: '往昔.',
     text: '“一定有其他办法的……”'
   },
-  {
-    name: '虚空之声',
-    text: '“做出选择。”'
-  },
-  {
-    name: '光暗神王',
-    text: '（看向往昔.）'
-  },
+    {
+      name: '虚空之声',
+      text: '“做出选择。”',
+      music: 'pity'
+    },
+    {
+      name: '光暗神王',
+      text: '（看向往昔.）'
+    },
   {
     name: '往昔.',
     text: '（看向我）'
@@ -2870,14 +2898,14 @@ STORY.sacrifice_self = [
     name: '光暗神王',
     text: '“对不起……但这是我的选择。”'
   },
-  {
-    name: '系统',
-    text: '我走向因果之核，准备献出自己的生命。'
-  },
-  {
-    next: "chapter8_climax"
-  }
-];
+    {
+      name: '系统',
+      text: '我走向因果之核，准备献出自己的生命。'
+    },
+    {
+      next: "chapter8_climax"
+    }
+  ];
 
 STORY.sacrifice_oth = [
   {
@@ -3122,26 +3150,27 @@ STORY.sacrifice_oth = [
     name: '系统',
     text: '永远被困在自己编织的谎言中，永远无法原谅自己的王。'
   },
-  {
-    name: '系统',
-    text: '【牺牲往昔.的坏结局】'
-  },
-  {
-    name: '系统',
-    text: '有时候，活着比死去更加痛苦。'
-  },
-  {
-    name: '系统',
-    text: '【游戏结束】'
-  },
     {
-    name: '系统',
-    text: '......'
-  },
-  {
-    name: '虚空之声',
-    text: '你真的甘心吗？'
-  },
+      name: '系统',
+      text: '【牺牲往昔.的坏结局】'
+    },
+    {
+      name: '系统',
+      text: '有时候，活着比死去更加痛苦。'
+    },
+    {
+      name: '系统',
+      text: '【游戏结束】',
+      music: 'clear'
+    },
+    {
+      name: '系统',
+      text: '......'
+    },
+    {
+      name: '虚空之声',
+      text: '你真的甘心吗？'
+    },
   {
     name: '制作人',
     text: '海棠络合物'
@@ -3275,18 +3304,19 @@ STORY.chapter8_climax = [
     name: '林默',
     text: '“现在，用心中的爱与希望，重新封印裂缝吧。”'
   },
-  {
-    name: '光暗神王',
-    text: '“往昔.，一起！”'
-  },
-  {
-    name: '往昔.',
-    text: '“嗯！一起！”'
-  },
-  {
-    name: '系统',
-    text: '我们的力量融合成一道彩虹般的光芒，注入了因果之核。'
-  },
+    {
+      name: '光暗神王',
+      text: '“往昔.，一起！”'
+    },
+    {
+      name: '往昔.',
+      text: '“嗯！一起！”'
+    },
+    {
+      name: '系统',
+      text: '我们的力量融合成一道彩虹般的光芒，注入了因果之核。',
+      music: 'promise'
+    },
   {
     name: '系统',
     text: '虚空之眼开始颤抖，裂缝开始愈合。'
@@ -3387,17 +3417,19 @@ STORY.chapter8_climax = [
     name: '系统',
     text: '新的一天开始了。'
   },
-  {
-    name: '系统',
-    text: '【第八章·虚空试炼 观测结束】'
-  },
-  { next: 'epilogue' }
-];
+    {
+      name: '系统',
+      text: '【第八章·虚空试炼 观测结束】',
+      music: 'clear'
+    },
+    { next: 'epilogue' }
+  ];
 
 // 尾声：新的开始
 STORY.epilogue = [
   {
     bg: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1920&q=80',
+    music: 'warm',
     name: '系统',
     text: '三个月后。'
   },
@@ -3489,18 +3521,19 @@ STORY.epilogue = [
     name: '系统',
     text: '爱与希望，永远比虚空更强大。'
   },
-  {
-    name: '系统',
-    text: '【尾声·新的开始 观测结束】'
-  },
-  {
-    name: '系统',
-    text: '【游戏结束】'
-  },
-  {
-    name: '系统',
-    text: '感谢游玩！'
-  },
+    {
+      name: '系统',
+      text: '【尾声·新的开始 观测结束】',
+      music: 'clear'
+    },
+    {
+      name: '系统',
+      text: '【游戏结束】'
+    },
+    {
+      name: '系统',
+      text: '感谢游玩！'
+    },
   {
     name: '系统',
     text: '——《千神万王》制作组'
