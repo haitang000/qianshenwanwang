@@ -189,33 +189,42 @@
 
       <!-- 难度选择页面 -->
       <div id="difficulty-layer">
-        <div class="difficulty-title">选择观测难度</div>
-        <div class="difficulty-options">
-          <div
-            class="difficulty-option"
-            onclick="game.selectDifficulty('easy')"
-          >
-            简单
+        <div class="difficulty-header">
+          <div class="difficulty-back" onclick="game.backToMenu()">← 返回</div>
+          <div class="difficulty-title">选择观测难度</div>
+          <div class="difficulty-subtitle">SELECT OBSERVATION DIFFICULTY</div>
+        </div>
+        <div class="difficulty-grid">
+          <div class="difficulty-card" onclick="game.selectDifficulty('easy')">
+            <div class="difficulty-icon">◈</div>
+            <div class="difficulty-name">简单</div>
+            <div class="difficulty-en">CASUAL</div>
+            <div class="difficulty-desc">轻松体验剧情，无压力</div>
+            <div class="difficulty-meta">推荐：故事向玩家</div>
           </div>
-          <div
-            class="difficulty-option"
-            onclick="game.selectDifficulty('medium')"
-          >
-            中等
+          <div class="difficulty-card" onclick="game.selectDifficulty('medium')">
+            <div class="difficulty-icon">◉</div>
+            <div class="difficulty-name">中等</div>
+            <div class="difficulty-en">STANDARD</div>
+            <div class="difficulty-desc">平衡的探索与挑战体验</div>
+            <div class="difficulty-meta">推荐：普通玩家</div>
           </div>
-          <div
-            class="difficulty-option"
-            onclick="game.selectDifficulty('hard')"
-          >
-            困难
+          <div class="difficulty-card" onclick="game.selectDifficulty('hard')">
+            <div class="difficulty-icon">✦</div>
+            <div class="difficulty-name">困难</div>
+            <div class="difficulty-en">HARDCORE</div>
+            <div class="difficulty-desc">每一次选择都至关重要</div>
+            <div class="difficulty-meta">推荐：追求挑战的玩家</div>
           </div>
-          <div
-            class="difficulty-option"
-            onclick="game.selectDifficulty('porcelain')"
-          >
-            瓷器
+          <div class="difficulty-card porcelain" onclick="game.selectDifficulty('porcelain')">
+            <div class="difficulty-icon">✺</div>
+            <div class="difficulty-name">瓷器</div>
+            <div class="difficulty-en">PORCELAIN</div>
+            <div class="difficulty-desc">极致的脆弱与美丽</div>
+            <div class="difficulty-meta">推荐：？？？</div>
           </div>
         </div>
+        <div class="difficulty-hint">※ 难度选择将影响剧情分支与结局走向</div>
       </div>
 
       <div id="death-layer" onclick="location.reload()">

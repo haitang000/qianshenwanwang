@@ -1551,6 +1551,22 @@ class Engine {
         }
     }
 
+    // 返回主菜单
+    backToMenu() {
+        const difficultyLayer = document.getElementById('difficulty-layer');
+        const menu = document.getElementById('menu-screen');
+        
+        if (difficultyLayer) {
+            difficultyLayer.style.display = 'none';
+        }
+        if (menu) {
+            menu.style.opacity = '1';
+            menu.style.pointerEvents = 'auto';
+        }
+        
+        this.eventSystem.emit('game:backToMenu');
+    }
+
     // 解锁当前章节（在场景切换时调用）
     unlockCurrentChapter() {
         const currentSceneId = this.sceneManager.currentSceneId;

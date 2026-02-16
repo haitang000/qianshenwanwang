@@ -259,39 +259,172 @@
         .corner.br { bottom: 40px; right: 40px; border-left: none; border-top: none; }
 
 
-        /* 难度选择页面样式 */
+        /* 难度选择页面样式 - 全新设计 */
         #difficulty-layer {
             position: absolute; inset: 0; z-index: 300;
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
+            background: radial-gradient(circle at center, #1a1a1e 0%, #0a0a0c 100%);
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            gap: 4rem;
+            gap: 3rem;
+            padding: 40px;
         }
-        .difficulty-title {
-            font-size: 4rem; color: #fff;
-            letter-spacing: 0.5rem;
-            font-family: var(--font-art);
-            text-shadow: 0 0 30px rgba(255,255,255,0.3);
-        }
-        .difficulty-options {
-            display: flex; flex-direction: column; gap: 2rem;
-            width: 80%; max-width: 600px;
-        }
-        .difficulty-option {
-            font-size: 2rem; color: #fff;
+
+        .difficulty-header {
             text-align: center;
-            padding: 20px 40px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 2px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            letter-spacing: 0.3rem;
-            background: rgba(255,255,255,0.05);
+            position: relative;
         }
-        .difficulty-option:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.6);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(255,255,255,0.2);
+
+        .difficulty-back {
+            position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+            font-size: 0.9rem; color: rgba(255,255,255,0.5);
+            cursor: pointer; letter-spacing: 0.1rem;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border: 1px solid transparent;
+        }
+
+        .difficulty-back:hover {
+            color: var(--theme-gold);
+            border-color: var(--theme-gold);
+            background: rgba(226, 192, 141, 0.1);
+        }
+
+        .difficulty-title {
+            font-size: 2.5rem; color: #fff;
+            letter-spacing: 0.8rem;
+            font-family: var(--font-art);
+            text-shadow: 0 0 30px rgba(255,255,255,0.2);
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-subtitle {
+            font-size: 0.75rem; color: rgba(255,255,255,0.4);
+            letter-spacing: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        .difficulty-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 25px; max-width: 900px; width: 100%;
+        }
+
+        .difficulty-card {
+            position: relative;
+            background: rgba(20, 20, 25, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 3px solid var(--theme-gold);
+            padding: 35px 30px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow: hidden;
+        }
+
+        .difficulty-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(226, 192, 141, 0.1) 0%, transparent 50%);
+            opacity: 0; transition: opacity 0.4s;
+        }
+
+        .difficulty-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(226, 192, 141, 0.4);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 
+                        0 0 30px rgba(226, 192, 141, 0.15);
+        }
+
+        .difficulty-card:hover::before {
+            opacity: 1;
+        }
+
+        .difficulty-icon {
+            font-size: 2rem; color: var(--theme-gold);
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(226, 192, 141, 0.5);
+            transition: all 0.4s;
+        }
+
+        .difficulty-card:hover .difficulty-icon {
+            transform: scale(1.2);
+            text-shadow: 0 0 30px rgba(226, 192, 141, 0.8);
+        }
+
+        .difficulty-name {
+            font-size: 1.6rem; color: #fff;
+            font-family: var(--font-art);
+            letter-spacing: 0.3rem;
+            margin-bottom: 5px;
+        }
+
+        .difficulty-en {
+            font-size: 0.7rem; color: rgba(255,255,255,0.4);
+            letter-spacing: 0.2rem;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-desc {
+            font-size: 0.95rem; color: rgba(255,255,255,0.6);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            min-height: 3em;
+        }
+
+        .difficulty-meta {
+            font-size: 0.75rem; color: var(--theme-gold);
+            opacity: 0.7;
+            letter-spacing: 0.05rem;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* 瓷器难度特殊样式 */
+        .difficulty-card.porcelain {
+            border-left-color: #c9a0dc;
+        }
+
+        .difficulty-card.porcelain .difficulty-icon {
+            color: #c9a0dc;
+            text-shadow: 0 0 20px rgba(201, 160, 220, 0.5);
+        }
+
+        .difficulty-card.porcelain:hover {
+            border-color: rgba(201, 160, 220, 0.4);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 
+                        0 0 30px rgba(201, 160, 220, 0.2);
+        }
+
+        .difficulty-card.porcelain:hover .difficulty-icon {
+            text-shadow: 0 0 30px rgba(201, 160, 220, 0.8);
+        }
+
+        .difficulty-card.porcelain .difficulty-meta {
+            color: #c9a0dc;
+        }
+
+        .difficulty-hint {
+            font-size: 0.8rem; color: rgba(255,255,255,0.4);
+            letter-spacing: 0.1rem;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .difficulty-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+            
+            .difficulty-title {
+                font-size: 1.8rem;
+                letter-spacing: 0.5rem;
+            }
+            
+            .difficulty-back {
+                position: relative;
+                top: 0; transform: none;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
         }
         .choice-btn {
             min-width: 400px; padding: 20px 40px;

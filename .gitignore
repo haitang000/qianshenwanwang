@@ -2,7 +2,7 @@ node_modules/
 dist/
 dist-new/
 dist-build/
+for_agent/
 package-lock.json
 .DS_Store
 *.log
-music.md
