@@ -588,7 +588,9 @@ class MusicManager {
             'night': 'night.mp3',
             'pity': 'pity.mp3',
             'warm': 'warm.mp3',
-            'entrance': 'entrance.mp3'
+            'entrance': 'entrance.mp3',
+            'darkness': 'darkness.mp3',
+            'promise': 'promise.mp3'
         };
     }
 

@@ -219,8 +219,8 @@ const STORY = {
     {
       name: '往昔.',
       char: { name: '往昔.', sprite: 'akimbo' },
+      music: 'happy',
       text: '“我知道，是神王大人的‘垂青’，对吧？”',
-      music: 'happy'
     },
     {
       name: '光暗神王',
@@ -2657,6 +2657,7 @@ STORY.trial2_start = [
   },
   {
     name: '系统',
+    music: 'darkness.mp3',
     text: '画面中是小时候的我和爷爷。'
   },
   {
@@ -2721,7 +2722,8 @@ STORY.trial2_start = [
   },
   {
     name: '光暗神王',
-    text: '（走向她，紧紧抱住她）'
+    text: '（走向她，紧紧抱住她）',
+    music: 'promise.mp3'
   },
   {
     name: '光暗神王',
@@ -2880,7 +2882,7 @@ STORY.sacrifice_self = [
 STORY.sacrifice_oth = [
   {
     bg: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1920&q=80',
-    music: 'pity',
+    music: 'darkness.mp3',
     name: '光暗神王',
     text: '（我看着往昔，内心挣扎了片刻）'
   },
@@ -3036,6 +3038,7 @@ STORY.sacrifice_oth = [
   },
   {
     bg: 'https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?auto=format&fit=crop&w=1920&q=80',
+    music: 'pity',
     name: '系统',
     text: '高二C班的教室里，依然喧嚣。'
   },
